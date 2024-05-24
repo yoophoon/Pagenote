@@ -1,0 +1,36 @@
+{
+    "manifest_version": 3,
+    "name": "pagenote",
+    "version": "1.0.0",
+    "description": "record your idea&opinion",
+    "permissions": [
+        "sidePanel",
+        "tabs",
+        "runtime"
+    ],
+    "action": {
+        "default_popup": "index.html",
+        "default_title": "Record your idea&opinion"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "src/Content/index.tsx"
+            ]
+        }
+    ],
+    "options_page": "options.html",
+    "side_panel": {
+        "default_path": "sidepanel.html"
+    },
+    "background": {
+        "service_worker": "src/Background/background.ts"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; default-src 'self';",
+        "sandbox": "script-src 'self' 'wasm-unsafe-eval'; default-src 'self';"
+    }
+}

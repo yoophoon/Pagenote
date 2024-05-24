@@ -1,0 +1,43 @@
+header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    --height: 60px;
+    --height-top: 45px;
+    --height-bottom: 10px;
+    gap: 10px;
+    vertical-align: bottom;
+}
+
+.ToperP {
+    font-size: var(--height-top);
+    line-height: var(--height-top);
+    margin: 0 0 8px;
+}
+
+.ToperPagenoteLog {
+    width: var(--height);
+    height: var(--height);
+    line-height: var(--height);
+    vertical-align: bottom;
+}
+
+.records {
+    margin: 0;
+    font-size: var(--height-bottom);
+    line-height: var(--height-bottom);
+    vertical-align: bottom;
+}
+
+.records img {
+    width: var(--height-bottom);
+    height: var(--height-bottom);
+    vertical-align: bottom;
+    margin-left: 7px;
+}
+
+.numOfRecords {
+    margin: 0 5px;
+    color: #990066;
+}

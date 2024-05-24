@@ -1,0 +1,96 @@
+/* #pagenoteEditorContent *::before,
+*::before {
+    content: '';
+} */
+
+#pagenoteEditor * {
+    text-transform: none;
+}
+
+/* 取消pagenote所有元素的margin避免行号分界线不显示 */
+#pagenoteEditorContent * {
+    margin: 0;
+
+    &:focus-visible {
+        outline: none;
+    }
+}
+
+#pagenoteEditorContent table:hover::before,
+thead:hover::before,
+tbody:hover::before,
+th:hover::before,
+tr:hover::before,
+td:hover::before {
+    content: '' !important;
+    display: none !important;
+}
+
+#pagenoteEditorContent table {
+    border-collapse: separate;
+}
+
+
+/* #pagenoteEditorContent *::after {
+    content: 'm';
+} */
+
+/* #pagenoteEditorContent *:focus-visible::after {
+    content: '<';
+} */
+
+
+/* counter 配合 元素选择器实现行号显示 */
+
+#pagenoteEditorContent {
+    counter-reset: lineRow;
+}
+
+#pagenoteEditorContent>* {
+    counter-increment: lineRow;
+}
+
+#pagenoteEditorContent>*:before {
+    content: counter(lineRow);
+}
+
+#pagenoteEditorContent :nth-child(n):active::before {
+    content: '>';
+}
+
+#pagenoteEditorContent :nth-child(n):hover::before {
+    content: '>';
+}
+
+#pagenoteEditorContent>*[currentLine] {
+    outline: none;
+
+    &::after {
+        content: '<' !important;
+    }
+}
+
+
+/* #pagenoteEditorContent *:read-write {
+    &::after {
+        content: '<';
+    }
+} */
+
+/* #pagenoteEditorContent div:focus-visible {
+    &::after {
+        content: '<';
+    }
+}
+
+#pagenoteEditorContent div:focus-within {
+    &::after {
+        content: '<';
+    }
+}
+
+#pagenoteEditorContent *:focus {
+    &::after {
+        content: '<';
+    }
+} */
