@@ -25,6 +25,7 @@ const BLOCK_ELEMENTS = [
 const minWidthAfterPagenoteFragment = 800
 
 export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], messageToEditor: TMessageToEditor } | undefined {
+    const pagenoteID = new Date().getTime()
     const selection = window.getSelection()
     //如果选区不存在或者是未选中状态或者选中的内容只包含换行制表或者空格符号，提前返回
     if (!selection || selection.type == 'Caret' || selection.toString().replace(/[\n\r\t ]*/g, '') == '') {
@@ -48,10 +49,10 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
         console.log('pagenoteFragment为空,或者其对应不止一处文本,生成pagenoteNodes失败')
         return
     }
-
+    console.log('pagenoteFragment:', pagenoteFragment)
+    console.log('pagenoteNodes', pagenoteNodes)
     //获取pagenote
     let pagenoteEles = pagenote.setPagenote(pagenoteNodes)
-
 
 
     const pagenotePosition = getPagenotePosition(pagenoteEles)
@@ -67,7 +68,8 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
         operation: EOperation.openEditor,
         value: {
             editorPosition: pagenotePosition,
-            pagenoteID: new Date().getTime(),
+            pagenoteID,
+            startIndex:pagenoteNodes.startIndex,
             pagenoteTitle: pagenoteFragment.textStart,
             pagenoteContent: (pagenoteFragment.prefix ?? '') + pagenoteFragment.textStart + (pagenoteFragment.textEnd + '') + (pagenoteFragment.textEnd ?? ''),
             pagenoteTimestamp: new Date().getTime(),
@@ -105,8 +107,8 @@ function getPagenotePosition(pagenoteEles: HTMLElement[]) {
     console.log(parentElement)
     if (parentElement == null) return 'error'
 
-    const parentElementWidth = window.getComputedStyle(parentElement).width
-    if (parseInt(parentElementWidth) >= minWidthAfterPagenoteFragment) {
+    const parentElementWidth = parentElement.getBoundingClientRect().width
+    if (parentElementWidth >= minWidthAfterPagenoteFragment) {
         return EPosition.afterPagenoteFragment
     }
     return EPosition.followPagenoteFragment

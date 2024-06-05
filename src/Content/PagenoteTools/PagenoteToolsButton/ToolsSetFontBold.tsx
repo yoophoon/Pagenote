@@ -1,19 +1,17 @@
-import { FormatColorFill } from "@mui/icons-material";
-import {  IconButton, Tooltip, Zoom } from "@mui/material";
+import { IconButton, Tooltip, Zoom } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
-import { ColorPicker } from "../../../Components/ColorPicker";
+import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 
-
-export default function ToolsSetBackgroundColor() {
+export default function ToolsSetFontBold() {
     const AnchorContext = useContext(PagenoteAnchorContext)
     if (AnchorContext == null) {
         return <></>
     }
 
     const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
-    const [color,setColor]=useState('')
-    const userColorPicker = tool == 'setBackgroundColor' ? <ColorPicker setColor={setColor}></ColorPicker> : null
+    const [fontBold,setFontBold]=useState(false)
+
     
     useEffect(() => {
         setAllPagenotesInfo(contentPagenotes => {
@@ -25,7 +23,7 @@ export default function ToolsSetBackgroundColor() {
                             ...pagenote.contentPagenote,
                             pagenoteStyle: {
                                 ...pagenote.contentPagenote.pagenoteStyle,
-                                backgroundColor: color,
+                                fontWeight: fontBold?'bold':'normal',
                             }
                         }
                     }
@@ -33,31 +31,32 @@ export default function ToolsSetBackgroundColor() {
                 return pagenote
             })
         })
-    }, [color])
+    }, [fontBold])
 
-    const handlerBackgroundColorClick = (e: React.MouseEvent) => {
+    const handlerFontBoldClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
-        setTool('setBackgroundColor')
+        setTool('setFontBold')
+        setFontBold(!fontBold)
     }
-
 
     return (
         <IconButton
             color='secondary'
-            onClick={handlerBackgroundColorClick}
+            onClick={handlerFontBoldClick}
             sx={{
-                position: 'relative', 
-                width: 30, 
+                position: 'relative',
+                width: 30,
                 height: '100%',
+                transformOrigin: 'center',
+                scale: '1.3',
+                transform: 'translateY(1px)'
             }}
         >
-            <Tooltip title="设置背景颜色" TransitionComponent={Zoom} arrow>
-                <FormatColorFill > </FormatColorFill>
+            <Tooltip title="设置粗体" TransitionComponent={Zoom} arrow>
+                <FormatBoldIcon > </FormatBoldIcon>
             </Tooltip>
-            {userColorPicker}
         </IconButton>)
 }
-
 

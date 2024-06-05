@@ -8,8 +8,8 @@ export class PagenoteGeneration {
         textEnd: '',
         suffix: '',
     }
-    constructor(selection: Selection) {
-        if (selection.toString() != '' && selection.getRangeAt(0)) {
+    constructor(selection: Selection | null = window.getSelection()) {
+        if (selection && selection.toString() != '' && selection.getRangeAt(0)) {
             this._pagenoteRange = selection.getRangeAt(0)
         }
     }
@@ -306,9 +306,9 @@ export class PagenoteGeneration {
         if (!pagenoteFragment) return
         let pagenoteNodes: Node[] = []
         let pagenoteFragmentStr = (pagenoteFragment.prefix ?? '') +
-            pagenoteFragment.textStart +
-            (pagenoteFragment.textEnd ?? '') +
-            (pagenoteFragment.suffix ?? '')
+                                    pagenoteFragment.textStart +
+                                    (pagenoteFragment.textEnd ?? '') +
+                                    (pagenoteFragment.suffix ?? '')
         let allTextNodes = this.getAllTextNodes(), allTextNodesIndex: number[] = []
         let allTextStr = ''
         let pagenoteTextStartIndex, pagenoteTextEndIndex
@@ -340,7 +340,7 @@ export class PagenoteGeneration {
             startOffset = this.getIndexInNodes(pagenoteNodes[0].nodeValue ?? '', pagenoteFragment.textStart, startOffset, true)
             endOffset = this.getIndexInNodes(pagenoteNodes[0].nodeValue ?? '', pagenoteFragment.textStart, endOffset, false)
         }
-        return { startOffset, endOffset, pagenoteNodes }
+        return { startOffset, endOffset, pagenoteNodes,startIndex:pagenoteTextStartIndex }
     }
 
     /**
@@ -392,7 +392,7 @@ export class PagenoteGeneration {
         if (!pagenoteNodes) return []
         let pagenoteEles: HTMLElement[] = []
         //如果pagenoteNodes的文本节点只有一个，则需要使用startOffset和endOffset同时对这个文本节点的值进行分割
-        if (pagenoteNodes.pagenoteNodes.length == 1) {
+        if (pagenoteNodes.pagenoteNodes.length == 1&&pagenoteNodes.pagenoteNodes[0].nodeValue!='') {
             pagenoteEles.push(this.markupPagenoteNode(
                 pagenoteNodes.pagenoteNodes[0],
                 pagenoteNodes.startOffset,
@@ -402,17 +402,17 @@ export class PagenoteGeneration {
         //如果还有中间节点的话，直接将中间节点的全部内容加入到pagenoteEle
         else if (pagenoteNodes.pagenoteNodes.length >= 2) {
             for (let i = 0; i < pagenoteNodes.pagenoteNodes.length; i++) {
-                if (i == 0) {
+                if (i == 0&&pagenoteNodes.pagenoteNodes[i].nodeValue!='') {
                     pagenoteEles.push(this.markupPagenoteNode(
                         pagenoteNodes.pagenoteNodes[i],
                         pagenoteNodes.startOffset,
                         this.normalizeStr(pagenoteNodes.pagenoteNodes[i].nodeValue).length))
-                } else if (i == pagenoteNodes.pagenoteNodes.length - 1) {
+                } else if (i == pagenoteNodes.pagenoteNodes.length - 1&&pagenoteNodes.pagenoteNodes[i].nodeValue!='') {
                     pagenoteEles.push(this.markupPagenoteNode(
                         pagenoteNodes.pagenoteNodes[i],
                         0,
                         pagenoteNodes.endOffset))
-                } else if (i != 0 && i != pagenoteNodes.pagenoteNodes.length - 1) {
+                } else if (i != 0 && i != pagenoteNodes.pagenoteNodes.length - 1&&pagenoteNodes.pagenoteNodes[i].nodeValue!='') {
                     pagenoteEles.push(this.markupPagenoteNode(
                         pagenoteNodes.pagenoteNodes[i],
                         0,

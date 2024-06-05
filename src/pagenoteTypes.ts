@@ -11,7 +11,8 @@ export type TPagenoteFragment = {
 export enum EOperation {
     openEditor,
     openNotesInSidepanel,
-    saveContent,
+    savePagenote,
+    getPagenotes,
     render,
 }
 
@@ -26,6 +27,7 @@ export type TMessageToEditor = {
     value: {
         editorPosition: EPosition,
         pagenoteID: number,
+        startIndex:number,
         pagenoteTitle: string,
         pagenoteContent: string,
         pagenoteTimestamp: number,
@@ -64,5 +66,32 @@ export enum ERenderTarget {
 export type TPagenoteNodes = {
     startOffset: number,
     endOffset: number,
+    startIndex:number,
     pagenoteNodes: Node[],
+}
+
+export interface TPagenoteStyle extends Partial<CSSStyleDeclaration>{
+    color?: string,
+    fontWeight?: string,
+    fontStyle?: string,
+    //文字装饰
+    textDecorationColor?: string,
+    textDecorationStyle?: string,
+    textDecorationThickness?: string,
+    textDecorationLine?: string,
+    //显示样式
+    display?: string,
+    backgroundColor?: string,
+}
+
+export type TPagenote = {
+    pagenoteID: number,
+    pagenoteTimestamp: number,
+    showTools:boolean,
+    //pagenoteFragment在页面中的位置，如果pagenoteFragment不存在则为-1
+    pagenoteIndex: number,
+    pagenoteFragment?: TPagenoteFragment,
+    pagenoteStyle?: TPagenoteStyle,
+    pagenoteTitle: string,
+    pagenoteContent: string,
 }

@@ -1,19 +1,17 @@
-import { FormatColorFill } from "@mui/icons-material";
-import {  IconButton, Tooltip, Zoom } from "@mui/material";
+import { IconButton, Tooltip, Zoom } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
-import { ColorPicker } from "../../../Components/ColorPicker";
 import { PagenoteAnchorContext } from '../PagenoteIcon'
+import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 
-
-export default function ToolsSetBackgroundColor() {
+export default function ToolsSetFontItalic() {
     const AnchorContext = useContext(PagenoteAnchorContext)
     if (AnchorContext == null) {
         return <></>
     }
 
     const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
-    const [color,setColor]=useState('')
-    const userColorPicker = tool == 'setBackgroundColor' ? <ColorPicker setColor={setColor}></ColorPicker> : null
+    const [fontItalic,setFontItalic]=useState(false)
+
     
     useEffect(() => {
         setAllPagenotesInfo(contentPagenotes => {
@@ -25,7 +23,7 @@ export default function ToolsSetBackgroundColor() {
                             ...pagenote.contentPagenote,
                             pagenoteStyle: {
                                 ...pagenote.contentPagenote.pagenoteStyle,
-                                backgroundColor: color,
+                                fontStyle: fontItalic?'italic':'normal',
                             }
                         }
                     }
@@ -33,31 +31,32 @@ export default function ToolsSetBackgroundColor() {
                 return pagenote
             })
         })
-    }, [color])
+    }, [fontItalic])
 
-    const handlerBackgroundColorClick = (e: React.MouseEvent) => {
+    const handlerFontItalicClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
-        setTool('setBackgroundColor')
+        setTool('setFontItalic')
+        setFontItalic(!fontItalic)
     }
-
 
     return (
         <IconButton
             color='secondary'
-            onClick={handlerBackgroundColorClick}
+            onClick={handlerFontItalicClick}
             sx={{
-                position: 'relative', 
-                width: 30, 
+                position: 'relative',
+                width: 30,
                 height: '100%',
+                transformOrigin: 'center',
+                scale: '1.2',
+                transform: 'translateY(1px)'
             }}
         >
-            <Tooltip title="设置背景颜色" TransitionComponent={Zoom} arrow>
-                <FormatColorFill > </FormatColorFill>
+            <Tooltip title="设置斜体" TransitionComponent={Zoom} arrow>
+                <FormatItalicIcon > </FormatItalicIcon>
             </Tooltip>
-            {userColorPicker}
         </IconButton>)
 }
-
 

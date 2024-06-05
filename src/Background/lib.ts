@@ -1,3 +1,8 @@
+/******************************************************************************************
+ * editor
+ */
+
+
 import { Root } from 'hast'
 /**
  * starryNight仓库提供了一个样例用于添加行号，测试发现这个仅对行第一个元素为element类型时才生效
@@ -125,4 +130,19 @@ function processTextNode(text: string) {
         recordLine.push(element)
     }
     return recordLine
+}
+
+
+/******************************************************************************************
+ * store
+ */
+
+
+import Dexie from 'dexie'
+export function savePagenote(){
+
+}
+
+export function getPagenotes(){
+    
 }

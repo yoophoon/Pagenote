@@ -1,10 +1,11 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { Description } from "@mui/icons-material";
+import { EOperation } from "../../pagenoteTypes";
 import Zoom from '@mui/material/Zoom'
 
 export function ShowSiteNotes() {
     const handleClick = () => {
-        chrome.runtime.sendMessage({ operation: 'openNotesInSidepanel', value: window.location.origin });
+        chrome.runtime.sendMessage({ operation: EOperation.openNotesInSidepanel, value: window.location.origin });
     }
 
     return (

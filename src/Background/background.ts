@@ -50,7 +50,7 @@ const extensionURL = chrome.runtime.getURL('')
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     const { operation } = message
-    if (operation == 'openNotesInSidepanel') {
+    if (operation == EOperation.openNotesInSidepanel) {
         //background无法使用window对象，这里通过message获取其他区域脚本传过来的origin
         //方便作为sidepanel的地址
         let SidepanelPath = extensionURL + 'sidepanel.html'
@@ -65,9 +65,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                 sendResponse({})
             }
         })
-    } else if (operation == 'openEditor') {
+    } else if (operation == EOperation.openEditor) {
 
-    } else if (operation == 'render') {
+    } else if (operation == EOperation.render) {
         console.log(message)
         console.log(message.value && message.value.target == ERenderTarget.hightlight && message.value.content != '')
         if (message.value && message.value.target == ERenderTarget.hightlight && message.value.content != '') {
@@ -79,8 +79,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
         }
         // console.log(renderedNode)
-    } else if (operation == 'saveContent') {
+    } else if (operation == EOperation.savePagenote) {
         console.log(message)
+    } else if (operation == EOperation.getPagenotes) {
+        console.log(message.value.origin)
+        sendResponse({ pagenotes: ['pagenotes'] })
+        return true
     }
 
 
@@ -98,7 +102,7 @@ chrome.runtime.onConnect.addListener(function (port) {
             createStarryNight(common).then(starryNight => {
                 const renderedContentHTML = toHtml(nodesInline(starryNight.highlight(message.value.content, 'text.md')))
                 port.postMessage({
-                    content:message.value.content,
+                    content: message.value.content,
                     renderedContent: renderedContentHTML,
                 });
             })

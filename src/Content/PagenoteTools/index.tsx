@@ -1,20 +1,27 @@
 import { ButtonGroup, ClickAwayListener, styled } from '@mui/material';
 import ToolsSetBackgroundColor from './PagenoteToolsButton/ToolsSetBackgroundColor';
 import ToolsSetFontColor from './PagenoteToolsButton/ToolsSetFontColor';
-import { Dispatch, createContext, useEffect, useState } from 'react';
+import { Dispatch, createContext, useEffect, useMemo, useState } from 'react';
+import ToolsSetFontBold from './PagenoteToolsButton/ToolsSetFontBold';
+import ToolsSetFontItalic from './PagenoteToolsButton/ToolsSetFontItalic';
+import ToolsSetFontOverline from './PagenoteToolsButton/ToolsSetFontOverline';
+import ToolsSetFontStrikethrough from './PagenoteToolsButton/ToolsSetFontStrikethrough';
+import ToolsSetFontUnderline from './PagenoteToolsButton/ToolsSetFontUnderline';
+import ToolsSetCustomStyle from './PagenoteToolsButton/ToolsSetCustomStyle';
+import ToolsSetPagenote from './PagenoteToolsButton/ToolsSetPagenote';
+import ToolsDelete from './PagenoteToolsButton/ToolsDelete';
 
 const ToolsButtonGroup = styled(ButtonGroup)(({ theme }) => ({
-    ...theme.palette.text,
-    color: 'text.primary',
-    backgroundColor: '#0000',
-    borderSpacing: 'solid',
+    backgroundColor: theme.palette.background.default,
+    borderStyle: 'solid',
     borderWidth: 1,
-    borderColor: 'text.secondary',
+    borderColor: theme.palette.secondary.main,
+    borderRadius: 10,
     position: 'absolute',
     zIndex: 999,
     left: 0,
     transform: 'translateX(-50%)',
-    gap: 5,
+    gap: 0,
     minHeight: 30,
     height: 30
 }))
@@ -33,66 +40,80 @@ interface IPagenoteAnchorStyle {
     backgroundColor?: string,
     [key: string]: string | undefined
 }
-
+type TTool = '' | 'setFontColor' | 'setBackgroundColor' | 'setFontBold' | 'setFontItalic' | 'setFontOverline' | 'setFontStrikethrough' | 'setFontUnderline' | 'setCustomStyle' | 'setPagenote' | 'delete'
 type TPagenoteAnchorContext = {
     style: IPagenoteAnchorStyle,
-    setStyle: Dispatch<IPagenoteAnchorStyle>
+    setStyle: Dispatch<IPagenoteAnchorStyle>,
+    tool: TTool,
+    setTool: Dispatch<TTool>
 }
 
 export const PagenoteAnchorContext = createContext<TPagenoteAnchorContext | null>(null)
 
 export function PagenoteTools(props: any) {
-    const { currentCssInfo, rectInfo, currentPagenoteAnchor, currentRoot, currentRootEle } = props
+    //pagenoteID            当前pagenote的唯一标识符，用于获取pagenote相关信息
+    //pagenoteToolsRoot     pagenoteTools的React.Root，用于当删除当前pagenote时卸载pagenoteTools
+    //pagenoteIconRoot      pagenoteIcon的React.Root，用于当删除当前pagenote时卸载pagenoteIcon
+    const { pagenoteID} = props
+    //缓存数据避免重复操作
+    const [ pagenoteAnchors, pagenoteIcon, rectInfo] = useMemo(() => {
+        //pagenoteAnchors       包含当前pagenoteFragment.textStart文本的一系列节点
+        const pagenoteAnchors = document.querySelectorAll(`pagenoteanchor:not([pagenoteid])`).length == 0 ? document.querySelectorAll(`pagenoteanchor[pagenoteid="${pagenoteID}"]`) : document.querySelectorAll(`pagenoteanchor:not([pagenoteid])`)
+        //pagenoteIcon          pagenoteAnchors节点后面跟随的图标，用于响应后续弹出pagenoteTools
+        const pagenoteIcon = document.querySelector(`pagenoteicon[pagenoteid="${pagenoteID}"]`)
+        //rectInfo              最后一个节点的宽高信息，主要使用rectInfo.height设置pagenoteTools的位置
+        const rectInfo = pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect()
+        return [ pagenoteAnchors, pagenoteIcon, rectInfo]
+    }, [pagenoteID])
 
-    const handlerClickAway = () => {
-        //移除选中文字
-        window.getSelection()?.removeAllRanges()
-        //清除pagenoteTools渲染的内容并将这个节点移至body外
-        if (currentRootEle.innerHTML != '') {
-            currentRoot.unmount()
-        }
-        document.documentElement.appendChild(currentRootEle)
-        //处理pagenoteanchor节点
-        if (currentPagenoteAnchor[0].getAttribute('style') != null) {
-            alert('创建笔记成功')
-        } else {
-            alert('创建笔记失败')
-        }
-    }
 
+
+    //响应点击工具框内部的情况
     const handlerMouseUp = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
+        //如果在pageotetools中触发点击事件的话就认为需要生成pagenote，
+        //这时为每个pagenoteanchor添加自定义属性pagenoteID
+        pagenoteAnchors.forEach((pagenoteAnchor: Element) => {
+            pagenoteAnchor.setAttribute('pagenoteID', pagenoteID.toString())
+        })
     }
 
     const [style, setStyle] = useState<IPagenoteAnchorStyle>({
-        color: currentCssInfo.color,
-        backgroundColor: currentCssInfo.backgroundColor,
-        display: currentCssInfo.display,
-        fontWeight: currentCssInfo.fontWeight,
+        // color: currentCssInfo.color,
+        // backgroundColor: currentCssInfo.backgroundColor,
+        // display: currentCssInfo.display,
+        // fontWeight: currentCssInfo.fontWeight,
     })
 
-    useEffect(() => {
-        for (let i = 0; i < currentPagenoteAnchor.length; i++) {
-            for (const property in style) {
-                currentPagenoteAnchor[i].style[property] = style[property]
-            }
-        }
-    }, [style])
+    const [tool, setTool] = useState<TTool>('')
 
-    return (<>
-        <ClickAwayListener onClickAway={handlerClickAway}>
-            <ToolsButtonGroup sx={{ top: rectInfo.height }} onMouseUp={e => handlerMouseUp(e)}>
+
+    return (<ToolsButtonGroup
+                sx={{
+                    top: rectInfo.height,
+                }}
+                onMouseUp={e => handlerMouseUp(e)}
+            >
                 <PagenoteAnchorContext.Provider
                     value={{
                         style,
-                        setStyle
-                    }}>
-                    <ToolsSetFontColor {...props} style={style} setStyle={setStyle} />
-                    <ToolsSetBackgroundColor {...props} />
+                        setStyle,
+                        tool,
+                        setTool
+                    }}
+                >
+                    <ToolsSetFontColor />
+                    <ToolsSetBackgroundColor />
+                    <ToolsSetFontBold />
+                    <ToolsSetFontItalic />
+                    <ToolsSetFontOverline />
+                    <ToolsSetFontStrikethrough />
+                    <ToolsSetFontUnderline />
+                    <ToolsSetCustomStyle />
+                    <ToolsSetPagenote />
+                    <ToolsDelete />
                 </PagenoteAnchorContext.Provider>
             </ToolsButtonGroup>
-        </ClickAwayListener>
-    </>
     )
 }

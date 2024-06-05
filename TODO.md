@@ -25,6 +25,7 @@ operation:
     - openNotesInSidepanel  打开侧栏  
     - render    渲染  //有些页面因为安全策略禁止加载wasm，为避免这些情况，统一使用后台脚本渲染
     - saveContent   保存笔记
+    - query    查询
 value:发送消息对应的值  
     //openEditor的值
     - {
@@ -61,19 +62,33 @@ value:发送消息对应的值
     }
     //saveContent的值对应saveContent操作
     {
-        operation:'saveContent',
+        operation:'savePagenote',
         value:{
-        //pagenote标识符
-        pagenoteID:crypto.randomUUID(),  
-        pagenoteFragment:{
-            prefix:string,
-            textStart:string,
-            textEnd:string,
-            suffix:string,
-        },
-        pagenoteTitle:string,
-        pagenoteContent:string,
-        pagenoteTimestamp:new Date().getTime(),
+            //pagenote标识符
+            pagenoteID:crypto.randomUUID(),
+            pagenoteTimeStamp:new Date().getTime(),
+            pagenoteFragment:{
+                prefix:string,
+                textStart:string,
+                textEnd:string,
+                suffix:string,
+            },
+            pagenoteStyle:{
+                color?: string,
+                fontWeight?: string,
+                fontStyle?: string,
+                //文字装饰
+                textDecorationColor?: string,
+                textDecorationStyle?: string,
+                textDecorationThickness?: string,
+                textDecorationLine?: string,
+                //显示样式
+                display?: string,
+                backgroundColor?: string,
+                [key: string]: string | undefined
+            },
+            pagenoteTitle:string,
+            pagenoteContent:string,
         }
     }
     //render
@@ -85,5 +100,31 @@ value:发送消息对应的值
             content:'string'
         }
     }
-
+    //pagenoteInfo
+    {
+        pagenoteID:number,
+        pagenoteTimestamp:new Date().getTime(),
+        pagenoteFragment?:{
+            prefix?:string,
+            textStart:string,
+            textEnd?:string,
+            suffix?:string,
+        },
+        pagenoteStyle?:{
+            color?: string,
+            fontWeight?: string,
+            fontStyle?: string,
+            //文字装饰
+            textDecorationColor?: string,
+            textDecorationStyle?: string,
+            textDecorationThickness?: string,
+            textDecorationLine?: string,
+            //显示样式
+            display?: string,
+            backgroundColor?: string,
+            [key: string]: string | undefined
+        },
+        pagenoteTitle:string,
+        pagenoteContent:string,
+    }
 ```

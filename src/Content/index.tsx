@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom/client";
+import ReactDOM, { Root } from "react-dom/client";
 import { EOperation, EPosition, TMessageToEditor } from "../pagenoteTypes";
 import Editor from '../Editor'
 import './PagenoteTools/pagenoteFragment'
@@ -43,6 +43,8 @@ const PagenoteEditorRoot = ReactDOM.createRoot(PagenoteEditor)
 //页面工具
 
 
+window.location.origin == `https://blog.csdn.net`
+console.log('fuck csdn')
 
 
 
@@ -54,57 +56,65 @@ const PagenoteEditorRoot = ReactDOM.createRoot(PagenoteEditor)
 
 
 
-
-import { PagenoteTools } from "./PagenoteTools";
-//这里驱动pagenoteTools
-const pagenoteTools = document.createElement('span')
-pagenoteTools.style.position = 'relative'
-pagenoteTools.id = 'pagenoteTools'
-document.documentElement.append(pagenoteTools)
-let PagenoteToolsRoot = ReactDOM.createRoot(pagenoteTools)
-
+// import { PagenoteTools } from "./PagenoteTools";
+// //这里驱动pagenoteTools
+// const pagenoteTools = document.createElement('span')
+// pagenoteTools.style.position = 'relative'
+// pagenoteTools.id = 'pagenotetools'
+// document.documentElement.append(pagenoteTools)
+// let PagenoteToolsRoot = ReactDOM.createRoot(pagenoteTools)
 
 
-import tryToGeneratePagenote, { selectEles } from "./PagenoteTools/pagenoteFragment";
-window.onmousedown = (e) => {
 
-}
-window.onmouseup = (e) => {
-    console.log('mouse up')
-    const result = tryToGeneratePagenote()
-    console.log(result)
-    if (result == undefined) {
-        return
-    }
-    const { pagenoteEles, messageToEditor } = result
-    console.log(pagenoteEles)
-    //在pagenoteEles末尾插入pagenoteTools节点
-    pagenoteEles[pagenoteEles.length - 1].parentNode?.insertBefore(pagenoteTools, pagenoteEles[pagenoteEles.length - 1])
-    pagenoteTools.parentNode?.insertBefore(pagenoteEles[pagenoteEles.length - 1], pagenoteTools)
-    const rectInfo = pagenoteEles[pagenoteEles.length - 1].getBoundingClientRect()
-    const cssInfo = window.getComputedStyle(pagenoteEles[pagenoteEles.length - 1])
-    if (pagenoteTools.innerHTML == '') {
-        PagenoteToolsRoot = ReactDOM.createRoot(pagenoteTools)
-    }
-    //渲染PanogenoteToolsRoot
-    PagenoteToolsRoot.render(
-        <ThemeProvider theme={pagenoteConfig.theme}>
-            <CssBaseline />
-            <PagenoteTools
-                messageToEditor={messageToEditor}
-                rectInfo={rectInfo}
-                currentPagenoteAnchor={pagenoteEles}
-                currentRoot={PagenoteToolsRoot}
-                currentCssInfo={cssInfo}
-                currentRootEle={pagenoteTools}
-            />
-        </ThemeProvider>)
-    selectEles(pagenoteEles)
-}
+// import tryToGeneratePagenote, { selectEles } from "./PagenoteTools/pagenoteFragment";
+// import PagenoteIcon from "./PagenoteTools/PagenoteIcon";
+// window.onmousedown = (e) => {
 
-window.ondblclick = (e) => {
-    // tryToGeneratePagenote()
-}
+// }
+// window.onmouseup = (e) => {
+//     const result = tryToGeneratePagenote()
+//     if (result == undefined) {
+//         return
+//     }
+//     const { pagenoteEles, messageToEditor } = result
+//     // const rectInfo = pagenoteEles[pagenoteEles.length - 1].getBoundingClientRect()
+//     // const cssInfo = window.getComputedStyle(pagenoteEles[pagenoteEles.length - 1])
+//     const { pagenoteIcon, pagenoteIconRoot } = createPagenoteIcon(messageToEditor.value.pagenoteID, pagenoteTools)
+//     pagenoteIconRoot.render(<PagenoteIcon
+//         pagenoteID={messageToEditor.value.pagenoteID}
+//         pagenoteIconRoot={pagenoteIconRoot}
+//         pagenoteToolsRoot={PagenoteToolsRoot} />)
+//     //更新pagenoteTools的pagenoteID属性
+//     pagenoteTools.setAttribute('pagenoteid', messageToEditor.value.pagenoteID.toString())
+//     //更新pagenoteIcon的pagenoteID属性
+//     pagenoteIcon.setAttribute('pagenoteid', messageToEditor.value.pagenoteID.toString())
+//     //在pagenoteEles末尾插入pagenoteTools和pagenoteIcon节点
+//     //pagenoteTools节点用于选中文本之后的操作
+//     //pagenoteIcon节点用于后续的操作
+//     pagenoteEles[pagenoteEles.length - 1].parentNode?.insertBefore(pagenoteTools, pagenoteEles[pagenoteEles.length - 1])
+//     pagenoteEles[pagenoteEles.length - 1].parentNode?.insertBefore(pagenoteIcon, pagenoteEles[pagenoteEles.length - 1])
+//     pagenoteTools.parentNode?.insertBefore(pagenoteEles[pagenoteEles.length - 1], pagenoteTools)
+//     //如果pagenotetools的innerHTML为空的话说明之前被卸载过了，这次需要重新创建React.Root
+//     if (pagenoteTools.innerHTML == '') {
+//         PagenoteToolsRoot = ReactDOM.createRoot(pagenoteTools)
+//     }
+//     //渲染PanogenoteToolsRoot
+//     PagenoteToolsRoot.render(
+//         <ThemeProvider theme={pagenoteConfig.theme}>
+//             <CssBaseline />
+//             <PagenoteTools
+//                 pagenoteID={messageToEditor.value.pagenoteID}
+//                 pagenoteIconRoot={pagenoteIconRoot}
+//                 pagenoteToolsRoot={PagenoteToolsRoot}
+//             />
+//         </ThemeProvider>)
+//     //选中当前pagenoteanchor元素，高亮选中的文本
+//     selectEles(pagenoteEles)
+// }
+
+// window.ondblclick = (e) => {
+//     // tryToGeneratePagenote()
+// }
 
 
 chrome.runtime.onMessage.addListener(function (message: TMessageToEditor, sender, sendResponse) {
@@ -141,3 +151,39 @@ chrome.runtime.onMessage.addListener(function (message: TMessageToEditor, sender
 //     PagenoteEditorRoot.render(<Editor openEditor={openEditor} pagenoteID={pagenoteID} pagenoteFragment={pagenoteFragment} theme={theme}></Editor>)
 // }
 
+// function createPagenoteIcon(pagenoteID: number, pagenoteToolsEle: HTMLElement) {
+//     const pagenoteIcon = document.createElement('pagenoteicon')
+//     const pagenoteIconRoot = ReactDOM.createRoot(pagenoteIcon)
+//     const pagenoteAnchors = document.querySelectorAll(`pagenoteanchor:not([pagenoteid])`).length == 0 ? document.querySelectorAll(`pagenoteanchor[pagenoteid="${pagenoteID}"]`) : document.querySelectorAll(`pagenoteanchor:not([pagenoteid])`)
+
+//     pagenoteIcon.onclick = (e) => {
+//         e.preventDefault()
+//         //pagenoteToolsRoot需要在每次点击的时候重新生成
+//         //后续离开面板又会立刻销毁
+//         const pagenoteToolsRoot = ReactDOM.createRoot(pagenoteToolsEle)
+//         pagenoteAnchors[pagenoteAnchors.length - 1].parentElement?.insertBefore(pagenoteToolsEle, pagenoteAnchors[pagenoteAnchors.length - 1])
+//         pagenoteAnchors[pagenoteAnchors.length - 1].parentElement?.insertBefore(pagenoteAnchors[pagenoteAnchors.length - 1], pagenoteToolsEle)
+
+//         pagenoteToolsRoot.render(
+//             <ThemeProvider theme={pagenoteConfig.theme}>
+//                 <CssBaseline />
+//                 <PagenoteTools
+//                     pagenoteID={pagenoteID}
+//                     pagenoteIconRoot={pagenoteIconRoot}
+//                     pagenoteToolsRoot={pagenoteToolsRoot}
+//                 />
+//             </ThemeProvider>)
+//         alert('hello pagenoteIcon')
+//     }
+//     return { pagenoteIcon, pagenoteIconRoot }
+// }
+
+
+
+import ContentPagenotes from "./ContentPagenotes";
+
+const pagenoteRoot = document.createElement('pagenoteroot')
+pagenoteRoot.setAttribute('id', 'pagenoteRoot')
+document.documentElement.append(pagenoteRoot)
+
+ReactDOM.createRoot(pagenoteRoot).render(<ContentPagenotes></ContentPagenotes>)
