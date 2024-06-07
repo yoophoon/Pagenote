@@ -17,17 +17,20 @@ export function AddNewNote() {
 function addANewNote() {
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        console.log(tabs)
+        const targetURL=new URL(tabs[0].url??"")
         const message: TMessageToEditor = {
-            operation: EOperation.openEditor,
+            operation: EOperation.addPagenote,
             value: {
-                editorPosition: EPosition.inPage,
+                pagenotePosition: EPosition.inPage,
                 pagenoteID: new Date().getTime(),
                 pagenoteTitle: 'new pagenote',
                 pagenoteContent: '',
                 pagenoteTimestamp: new Date().getTime(),
-                pagenoteFragment: {
-                    textStart: ''
-                }
+                pagenoteTarget:targetURL.origin+targetURL.pathname,
+                pagenoteIndex:-1,
+                showTools:false,
+                showEditor:true,
             }
         }
         if (tabs[0].id)

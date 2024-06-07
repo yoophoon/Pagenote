@@ -5,7 +5,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ColorizeIcon from '@mui/icons-material/Colorize';
 import { PickerCanvas } from './PickerCanvas';
 
-export const ColorPicker = forwardRef((props: any) => {
+export const ColorPicker = forwardRef((props: any,ref:any) => {
   const { setColor } = props
   const [opacity, setOpacity] = useState(255)
   const [sliderRGB, setSliderRGB] = useState({

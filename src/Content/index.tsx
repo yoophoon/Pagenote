@@ -1,31 +1,17 @@
-import ReactDOM, { Root } from "react-dom/client";
-import { EOperation, EPosition, TMessageToEditor } from "../pagenoteTypes";
-import Editor from '../Editor'
-import './PagenoteTools/pagenoteFragment'
+import ReactDOM from "react-dom/client";
+import ContentPagenotes from "./ContentPagenotes";
+
+
+//创建react管理容器
+const pagenoteRoot = document.createElement('pagenoteroot')
+pagenoteRoot.setAttribute('id', 'pagenoteroot')
+document.documentElement.append(pagenoteRoot)
+
+ReactDOM.createRoot(pagenoteRoot).render(<ContentPagenotes></ContentPagenotes>)
 
 
 
-import { ThemeProvider, createTheme } from '@mui/material';
-import CssBaseline from "@mui/material/CssBaseline";
-//pagenote配置初始化
 
-
-const darkTheme = createTheme({
-    palette: {
-        mode: 'dark',
-    },
-});
-
-const pagenoteConfig = {
-    theme: darkTheme,
-}
-
-const gloableStatus = {
-    // pagenoteToolsMount: false,
-}
-
-
-//Root初始化
 //---------------------------------------------------------------------------------------------
 //页面编辑器：固定在整个页面中央，点击编辑器周边区域即退出
 //这种显示方式是为了方便在任何网页进行笔记记录，响应popup的new pagenote按钮
@@ -35,16 +21,16 @@ const gloableStatus = {
 //---------------------------------------------------------------------------------------------
 //内嵌在pagenoteFragment节点后方编辑器，当编辑器最小宽度大于pagenoteFragment所在元素节点宽度时采用这种方式显示
 //当pagenoteFragment节点区域空间足够时这种显示方式最好
-const PagenoteEditor = document.querySelector('#pagenoteEditor') ?? document.createElement('div')
-PagenoteEditor.id = 'pagenoteEditor'
+
+
+/*******************************************************************************
+ * init
+ */
+
+const PagenoteEditor = document.querySelector('#pagenoteeditor') ?? document.createElement('div')
+PagenoteEditor.id = 'pagenoteeditor'
 document.documentElement.append(PagenoteEditor)
-const PagenoteEditorRoot = ReactDOM.createRoot(PagenoteEditor)
 
-//页面工具
-
-
-window.location.origin == `https://blog.csdn.net`
-console.log('fuck csdn')
 
 
 
@@ -117,31 +103,22 @@ console.log('fuck csdn')
 // }
 
 
-chrome.runtime.onMessage.addListener(function (message: TMessageToEditor, sender, sendResponse) {
-    //在当前网站新加一个pagenote
-    console.log(message)
-    if (message.operation == EOperation.openEditor &&
-        message.value.editorPosition == EPosition.inPage && sender) {
-        //如果编辑器已经打开了，就提前返回，并响应 editorStatus:true
-        if (document.querySelector('#pagenoteEditor') != null) {
-            sendResponse({ editorStatus: 'open' })
-            return
-        }
-        const openEditor = {
-            open: true,
-            position: message.value.editorPosition,
-            initTitle: message.value.pagenoteTitle ? message.value.pagenoteTitle : (message.value.pagenoteFragment ? message.value.pagenoteFragment.textStart : 'pagenote'),
-            initContent: message.value.pagenoteContent ? message.value.pagenoteContent : (message.value.pagenoteFragment ? message.value.pagenoteFragment.textStart : `# 留下你的\n想法、观点`),
-        }
-        const pagenoteID = message.value.pagenoteID
-        const pagenoteFragment = message.value.pagenoteFragment
-        const pagenoteTimestamp = message.value.pagenoteTimestamp
-
-        PagenoteEditorRoot.render(<ThemeProvider theme={pagenoteConfig.theme}><Editor openEditor={openEditor} pagenoteID={pagenoteID} pagenoteFragment={pagenoteFragment} pagenoteTimestamp={pagenoteTimestamp} ></Editor></ThemeProvider>)
-        // openEditorInpage(openEditor, pagenoteID, pagenoteFragment, starryNight)
-        sendResponse({ editorStatus: 'open' })
-    }
-})
+// chrome.runtime.onMessage.addListener(function (message: TMessageToEditor, sender, sendResponse) {
+//     //在当前网站新加一个pagenote
+//     console.log(message)
+//     if (message.operation == EOperation.openEditor &&
+//         message.value.pagenotePosition == EPosition.inPage && sender) {
+//         //如果编辑器已经打开了，就提前返回，并响应 editorStatus:true
+//         if (document.querySelector('#pagenoteEditor') != null) {
+//             sendResponse({ editorStatus: 'open' })
+//             return
+//         }
+        
+//         PagenoteEditorRoot.render(<ThemeProvider theme={pagenoteConfig.theme}><Editor openEditor={openEditor} pagenoteID={pagenoteID} pagenoteFragment={pagenoteFragment} pagenoteTimestamp={pagenoteTimestamp} ></Editor></ThemeProvider>)
+//         // openEditorInpage(openEditor, pagenoteID, pagenoteFragment, starryNight)
+//         sendResponse({ editorStatus: 'open' })
+//     }
+// })
 
 
 
@@ -180,10 +157,3 @@ chrome.runtime.onMessage.addListener(function (message: TMessageToEditor, sender
 
 
 
-import ContentPagenotes from "./ContentPagenotes";
-
-const pagenoteRoot = document.createElement('pagenoteroot')
-pagenoteRoot.setAttribute('id', 'pagenoteRoot')
-document.documentElement.append(pagenoteRoot)
-
-ReactDOM.createRoot(pagenoteRoot).render(<ContentPagenotes></ContentPagenotes>)

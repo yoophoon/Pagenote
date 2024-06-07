@@ -18,7 +18,7 @@ export default function ToolsSetFontColor() {
     useEffect(() => {
         setAllPagenotesInfo(contentPagenotes => {
             return contentPagenotes.map(pagenote => {
-                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.contentPagenote.pagenoteID) {
+                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.pagenoteID) {
                     pagenote = {
                         ...pagenote,
                         contentPagenote: {

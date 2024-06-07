@@ -9,21 +9,45 @@ export default function ToolsSetFontStrikethrough() {
         return <></>
     }
 
-    const {  setTool } = AnchorContext
+    const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
+    const [fontStrikethrough,setFontStrikethrough]=useState(false)
 
     
+    useEffect(() => {
+        setAllPagenotesInfo(contentPagenotes => {
+            return contentPagenotes.map(pagenote => {
+                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.pagenoteID) {
+                    pagenote = {
+                        ...pagenote,
+                        contentPagenote: {
+                            ...pagenote.contentPagenote,
+                            pagenoteStyle: {
+                                ...pagenote.contentPagenote.pagenoteStyle,
+                                textDecoration: fontStrikethrough?
+                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'')+' line-through':
+                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'').replace(/line-through/g,'').replace(/[ ]+/g,' ').trim(),
+                            }
+                        }
+                    }
+                }
+                console.log(pagenote)
+                return pagenote
+            })
+        })
+    }, [fontStrikethrough])
 
-    const handlerFontBoldClick = (e: React.MouseEvent) => {
+    const handlerFontStrikethroughClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
-        setTool('setFontBold')
+        setTool('setFontStrikethrough')
+        setFontStrikethrough(!fontStrikethrough)
     }
 
     return (
         <IconButton
             color='secondary'
-
+            onClick={handlerFontStrikethroughClick}
             sx={{
                 position: 'relative',
                 width: 30,
@@ -33,7 +57,7 @@ export default function ToolsSetFontStrikethrough() {
                 transform: 'translateY(1px)'
             }}
         >
-            <Tooltip title="设置字体颜色" TransitionComponent={Zoom} arrow>
+            <Tooltip title="设置删除线" TransitionComponent={Zoom} arrow>
                 <StrikethroughSIcon > </StrikethroughSIcon>
             </Tooltip>
         </IconButton>)

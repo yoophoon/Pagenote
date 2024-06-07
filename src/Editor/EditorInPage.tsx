@@ -2,13 +2,25 @@ import { Box, Divider, Modal } from "@mui/material"
 import EditorTitle from './EditorTitle'
 import EditorToolBar from "./EditorToolBar"
 import EditorContent from "./EditorContent"
-import { useContext } from "react"
-import { EditorContext } from "."
 import './Editor.css'
+import { TPagenote, TSetContentPagenotes } from "../pagenoteTypes"
+import { createContext, useState } from "react"
 
-//这个页面同EditorFollowPagenoteFragment及EditorAfterPagenoteFragment两个组件功能一致
-//均为设置editor的位置及一些其他的属性
-export default function EditorInPage(): JSX.Element {
+type TPagenoteInpage = {
+    pagenoteInfo: TPagenote,
+    setAllPagenotesInfo: TSetContentPagenotes
+}
+
+export const noteContext=createContext<{note:{
+    title: string;
+    content: string;
+},
+setNote:React.Dispatch<React.SetStateAction<{
+    title: string;
+    content: string;
+}>>}|null>(null)
+
+export default function EditorInPage(props:TPagenoteInpage) {
     //
     const style = {
         position: 'absolute' as 'absolute',
@@ -19,17 +31,18 @@ export default function EditorInPage(): JSX.Element {
         p: 2,
     };
 
-    const { openEditor, setOpenEditor } = useContext(EditorContext)
+    const { pagenoteInfo, setAllPagenotesInfo } = props
+    const [inpageEditorOpen, setInpageEditorOpen] = useState(pagenoteInfo.showEditor)
+    const [note, setNote] = useState({ title: pagenoteInfo.pagenoteTitle??'', content: pagenoteInfo.pagenoteContent??'', })
+    
 
     return (
         <Modal
-            open={openEditor.open}
+            open={inpageEditorOpen}
             onClose={() => {
                 if (hasContent() == false) {
-                    setOpenEditor({
-                        ...openEditor,
-                        open: false,
-                    })
+                    setInpageEditorOpen(!inpageEditorOpen)
+                    
                 }
             }}
             aria-labelledby="modal-modal-title"
@@ -41,13 +54,15 @@ export default function EditorInPage(): JSX.Element {
                 color={'text.primary'}
                 id='pagenoteEditor'
             >
-                <EditorTitle />
-                <Divider aria-hidden="true" />
-                {/* editor toolbar */}
-                <EditorToolBar />
-                <Divider aria-hidden="true" />
-                <EditorContent >
-                </EditorContent>
+                <noteContext.Provider value={{note,setNote}}>
+                    <EditorTitle />
+                    <Divider aria-hidden="true" />
+                    {/* editor toolbar */}
+                    {/* <EditorToolBar /> */}
+                    <Divider aria-hidden="true" />
+                    <EditorContent >
+                    </EditorContent>
+                </noteContext.Provider>
             </Box>
         </Modal >)
 }
@@ -73,4 +88,21 @@ function hasContent(): boolean {
         return false
     }
     return true
+}
+
+function handlerExitEditor(pagenoteInfo: TPagenote,setAllPagenotesInfo: TSetContentPagenotes){
+    setAllPagenotesInfo(allPagenotesInfo=>{
+        return allPagenotesInfo.map(pagenote=>{
+            if(pagenoteInfo.pagenoteID==pagenote?.contentPagenote.pagenoteID){
+                pagenote={
+                    ...pagenote,
+                    contentPagenote:{
+                        ...pagenote.contentPagenote,
+                        showEditor:false,
+                    }
+                }
+            }
+            return pagenote
+        })
+    })
 }

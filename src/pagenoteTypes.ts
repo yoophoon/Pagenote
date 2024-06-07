@@ -9,6 +9,7 @@ export type TPagenoteFragment = {
 }
 
 export enum EOperation {
+    addPagenote,
     openEditor,
     openNotesInSidepanel,
     savePagenote,
@@ -22,18 +23,7 @@ export enum EPosition {
     afterPagenoteFragment
 }
 
-export type TMessageToEditor = {
-    operation: EOperation,
-    value: {
-        editorPosition: EPosition,
-        pagenoteID: number,
-        startIndex:number,
-        pagenoteTitle: string,
-        pagenoteContent: string,
-        pagenoteTimestamp: number,
-        pagenoteFragment: TPagenoteFragment
-    }
-}
+
 
 export type TOpenEditor = {
     open: boolean,
@@ -87,11 +77,22 @@ export interface TPagenoteStyle extends Partial<CSSStyleDeclaration>{
 export type TPagenote = {
     pagenoteID: number,
     pagenoteTimestamp: number,
+    pagenoteTarget:string,
+    pagenotePosition:EPosition,
     showTools:boolean,
+    showEditor:boolean,
     //pagenoteFragment在页面中的位置，如果pagenoteFragment不存在则为-1
     pagenoteIndex: number,
     pagenoteFragment?: TPagenoteFragment,
     pagenoteStyle?: TPagenoteStyle,
-    pagenoteTitle: string,
-    pagenoteContent: string,
+    pagenoteTitle?: string,
+    pagenoteContent?: string,
 }
+
+export type TMessageToEditor = {
+    operation: EOperation,
+    value: TPagenote,
+}
+
+export type TContentPagenote=({pagenoteIcon?:HTMLElement,contentPagenote:TPagenote} | undefined)
+export type TSetContentPagenotes=React.Dispatch<React.SetStateAction<TContentPagenote[]>>

@@ -1,7 +1,6 @@
 import { Typography } from "@mui/material"
 import { useContext } from "react"
-import { EditorContext } from "."
-
+import { noteContext } from "./EditorInPage"
 
 /**
  * 用户可以双击修改标题，双击选中之后的outline不再清除
@@ -9,9 +8,10 @@ import { EditorContext } from "."
  */
 
 export default function EditorTitle() {
-    const { openEditor, setOpenEditor } = useContext(EditorContext)
 
-
+    const notecontext=useContext(noteContext)
+    if (notecontext == null) { return }
+    const {note,setNote}=notecontext
     //处理双击事件，如果用户对title元素进行双击，先将元素的contenteditable设置为plaintext-only
     //然后选中title的全部文字等待用户修改，代替之前的浏览器弹窗修改标题，这样更符合用户使用习惯
     const handlerDoubleClick = () => {
@@ -32,9 +32,9 @@ export default function EditorTitle() {
         const editorTitleEle = document.querySelector('#pagenote-editor-title')
         if (editorTitleEle == null) return
         editorTitleEle.setAttribute('contenteditable', 'false')
-        setOpenEditor({
-            ...openEditor,
-            initTitle: editorTitleEle.innerHTML
+        setNote({
+            ...note,
+            title:editorTitleEle.innerHTML
         })
     }
 
@@ -48,7 +48,7 @@ export default function EditorTitle() {
         onDoubleClick={handlerDoubleClick}
         onBlur={handlerBlur}
     >
-        {openEditor.initTitle}
+        {note.title}
     </ Typography >)
 }
 

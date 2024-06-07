@@ -1,7 +1,7 @@
 //import { PagenoteFragmentPresentation } from "./pagenoteFragmentPresentation";
 // import { generateFragment } from "./pagenoteFragmentGeneration"
 
-import { EOperation, EPosition, TMessageToEditor, TPagenoteNodes } from "../../../pagenoteTypes"
+import { EOperation, EPosition, TMessageToEditor, TPagenote, TPagenoteNodes } from "../../../pagenoteTypes"
 import { PagenoteGeneration } from "./pagenoteGeneration"
 
 
@@ -24,7 +24,7 @@ const BLOCK_ELEMENTS = [
 //用于判断显示在pagenoteFragment后面的编辑器的最小宽度
 const minWidthAfterPagenoteFragment = 800
 
-export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], messageToEditor: TMessageToEditor } | undefined {
+export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], contentPagenote: TPagenote } | undefined {
     const pagenoteID = new Date().getTime()
     const selection = window.getSelection()
     //如果选区不存在或者是未选中状态或者选中的内容只包含换行制表或者空格符号，提前返回
@@ -64,20 +64,21 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
     //开始处理选中的文本（修改页面中的显示状态）
 
     //添加笔记
-    const messageToEditor: TMessageToEditor = {
-        operation: EOperation.openEditor,
-        value: {
-            editorPosition: pagenotePosition,
-            pagenoteID,
-            startIndex:pagenoteNodes.startIndex,
-            pagenoteTitle: pagenoteFragment.textStart,
-            pagenoteContent: (pagenoteFragment.prefix ?? '') + pagenoteFragment.textStart + (pagenoteFragment.textEnd + '') + (pagenoteFragment.textEnd ?? ''),
-            pagenoteTimestamp: new Date().getTime(),
-            pagenoteFragment,
-        }
+    const contentPagenote: TPagenote = {
+
+        pagenotePosition: pagenotePosition,
+        pagenoteID,
+        pagenoteIndex: pagenoteNodes.startIndex,
+        pagenoteTitle: pagenoteFragment.textStart,
+        pagenoteContent: (pagenoteFragment.prefix ?? '') + pagenoteFragment.textStart + (pagenoteFragment.textEnd + '') + (pagenoteFragment.textEnd ?? ''),
+        pagenoteTimestamp: new Date().getTime(),
+        pagenoteFragment,
+        pagenoteTarget: window.location.origin + window.location.pathname,
+        showTools: false,
+        showEditor: false,
     }
 
-    return { pagenoteEles, messageToEditor }
+    return { pagenoteEles, contentPagenote }
 }
 
 export function selectEles(target: HTMLElement[]) {

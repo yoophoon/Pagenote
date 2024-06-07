@@ -1,7 +1,7 @@
 import { ButtonGroup, IconButton, SvgIcon, Tooltip, Zoom } from '@mui/material'
 import SetTable from '../../assets/svg/Table'
 import { FormatListNumbered } from '@mui/icons-material'
-import EditorSaveContent from './EditorSaveContent'
+// import EditorSaveContent from './EditorSaveContent'
 import EditorMarkup from './EditorRenderMarkup'
 export default function EditorToolBar() {
     return (
@@ -34,7 +34,7 @@ export default function EditorToolBar() {
             <EditorToolSplit />
             <EditorMarkup />
             <EditorToolSplit />
-            <EditorSaveContent />
+            {/* <EditorSaveContent /> */}
         </ButtonGroup>)
 }
 

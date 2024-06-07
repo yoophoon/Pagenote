@@ -1,37 +1,57 @@
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
-import { TPagenote } from "../pagenoteTypes"
 import { PagenoteGeneration } from "./PagenoteTools/pagenoteFragment/pagenoteGeneration"
-import { EOperation } from "../pagenoteTypes"
+import { TPagenote, EOperation, TContentPagenote, TSetContentPagenotes } from "../pagenoteTypes"
 import PagenoteIcon from "./PagenoteTools/PagenoteIcon"
+import RegistMessageListener from "./RegistMessageListener"
 
 export default function ContentPagenotes() 
 {
-    const [pagenotesInfo, setPagenotesInfo] = useState<({pagenoteIcon:HTMLElement,contentPagenote:TPagenote} | undefined)[]>([])
+    const [pagenotesInfo, setPagenotesInfo] = useState<TContentPagenote[]>([])
     useEffect(() => {
         //处理页面第一次加载，从后台获取数据
-        initPagenotes(setPagenotesInfo)
+        // initPagenotes(setPagenotesInfo)
+        RegistMessageListener(setPagenotesInfo)
         //处理页面选中事件
         document.onmouseup=(e)=>{
-            e.preventDefault()
-            e.stopPropagation()
-            handlerContentMouseup(setPagenotesInfo)
+            console.log(e)
+            if(e.button==0){
+                e.preventDefault()
+                e.stopPropagation()
+                handlerContentMouseup(setPagenotesInfo)
+            }
         }
     },[])
-
+    console.log(pagenotesInfo)
     return (<>
         {pagenotesInfo.map(pagenoteInfo=>{
+            console.log(pagenoteInfo&&
+                pagenoteInfo.pagenoteIcon==undefined&&
+                pagenoteInfo.contentPagenote.showEditor)
             return (
                 pagenoteInfo&&
+                pagenoteInfo.pagenoteIcon&&
                 createPortal(
                     <PagenoteIcon
                         key={pagenoteInfo.contentPagenote.pagenoteID}
-                        pagenoteInfo={pagenoteInfo}
-                        allPagenotesInfo={pagenotesInfo}
+                        pagenoteInfo={pagenoteInfo.contentPagenote}
                         setAllPagenotesInfo={setPagenotesInfo}
                         >
                     </PagenoteIcon>,
                     pagenoteInfo.pagenoteIcon
+                )
+            )||(pagenoteInfo&&
+                pagenoteInfo.pagenoteIcon==undefined&&
+                pagenoteInfo.contentPagenote.showEditor&&
+                createPortal(
+                    // <EditorInPage
+                    //     key={pagenoteInfo.contentPagenote.pagenoteID}
+                    //     pagenoteInfo={pagenoteInfo.contentPagenote}
+                    //     setAllPagenotesInfo={setPagenotesInfo}
+                    //     >
+                    // </EditorInPage>
+                    <div>hello world</div>,
+                    document.body
                 )
             )
         })}
@@ -86,18 +106,19 @@ function presentPagenotes(contentPagenotes: TPagenote[])
  * save
  */
 import tryToGeneratePagenote , { selectEles } from "./PagenoteTools/pagenoteFragment"
+import EditorInPage from "../Editor/EditorInPage"
 
 
-function handlerContentMouseup(setPagenotesInfo: React.Dispatch<React.SetStateAction<({ pagenoteIcon: HTMLElement; contentPagenote: TPagenote; } | undefined)[]>>)
+function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
 {
     const result = tryToGeneratePagenote()
     if (result == undefined) {
         return
     }
-    const { pagenoteEles, messageToEditor } = result
-    pagenoteEles.forEach(pagenoteEle=>pagenoteEle.setAttribute('pagenoteid',messageToEditor.value.pagenoteID.toString()))
+    const { pagenoteEles, contentPagenote } = result
+    pagenoteEles.forEach(pagenoteEle=>pagenoteEle.setAttribute('pagenoteid',contentPagenote.pagenoteID.toString()))
     const pagenoteIcon=document.createElement('pagenoteIcon')
-    pagenoteIcon.setAttribute('pagenoteid',messageToEditor.value.pagenoteID.toString())
+    pagenoteIcon.setAttribute('pagenoteid',contentPagenote.pagenoteID.toString())
     //调整位置
     pagenoteEles[pagenoteEles.length - 1].parentNode?.insertBefore(pagenoteIcon, pagenoteEles[pagenoteEles.length - 1])
     pagenoteEles[pagenoteEles.length - 1].parentNode?.insertBefore(pagenoteEles[pagenoteEles.length - 1], pagenoteIcon)
@@ -106,25 +127,32 @@ function handlerContentMouseup(setPagenotesInfo: React.Dispatch<React.SetStateAc
     setPagenotesInfo(pagenotesInfo => {
         //检查选中的内容是否已经在之前生成过pagenoe
         for (let i = 0; i < pagenotesInfo.length; i++) {
-            if (pagenotesInfo[i]?.contentPagenote.pagenoteContent == messageToEditor.value.pagenoteContent) {
+            if (pagenotesInfo[i]?.contentPagenote.pagenoteContent == contentPagenote.pagenoteContent) {
                 pagenoteEles.forEach(pagenoteEle => pagenoteEle.outerHTML = pagenoteEle.innerHTML)
                 pagenoteIcon.remove()
                 selectEles(Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${pagenotesInfo[i]?.contentPagenote.pagenoteID}"]`)))
                 return pagenotesInfo
             }
         }
-        selectEles(Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${messageToEditor.value.pagenoteID}"]`)))
+        selectEles(Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${contentPagenote.pagenoteID}"]`)))
         return [...pagenotesInfo, {
             pagenoteIcon,
             contentPagenote: {
-                pagenoteID: messageToEditor.value.pagenoteID,
-                pagenoteTimestamp: messageToEditor.value.pagenoteTimestamp,
+                ...contentPagenote,
                 showTools:true,
-                pagenoteIndex: messageToEditor.value.startIndex,
-                pagenoteTitle: messageToEditor.value.pagenoteTitle,
-                pagenoteContent: messageToEditor.value.pagenoteContent,
-                pagenoteFragment: messageToEditor.value.pagenoteFragment,
             }
         }]
     })
+}
+
+
+/*******************************************************************************
+ * tools
+ */
+
+function getPagenoteEditorContainer():Element{
+    const PagenoteEditor = document.querySelector('#pagenoteeditor') ?? document.createElement('div')
+    PagenoteEditor.id = 'pagenoteeditor'
+    document.documentElement.append(PagenoteEditor)
+    return PagenoteEditor
 }

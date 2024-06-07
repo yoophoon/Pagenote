@@ -1,7 +1,7 @@
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Box, Button, ButtonGroup, ClickAwayListener, styled } from '@mui/material';
-import { createContext, useEffect, useMemo, useState } from 'react';
-import { TPagenote, TPagenoteStyle } from "../../pagenoteTypes"
+import { createContext, memo, useEffect, useMemo, useState } from 'react';
+import { TPagenote, TPagenoteStyle, TContentPagenote, TSetContentPagenotes } from "../../pagenoteTypes"
 import ToolsSetFontColor from './PagenoteToolsButton/ToolsSetFontColor';
 import ToolsSetBackgroundColor from './PagenoteToolsButton/ToolsSetBackgroundColor';
 import ToolsSetFontBold from './PagenoteToolsButton/ToolsSetFontBold';
@@ -14,9 +14,8 @@ import ToolsSetPagenote from './PagenoteToolsButton/ToolsSetPagenote';
 import ToolsDelete from './PagenoteToolsButton/ToolsDelete';
 
 type TPagenoteIcon = {
-    pagenoteInfo: ({ pagenoteIcon: HTMLElement; contentPagenote: TPagenote; } ),
-    allPagenotesInfo: ({ pagenoteIcon: HTMLElement; contentPagenote: TPagenote; } | undefined)[],
-    setAllPagenotesInfo: React.Dispatch<React.SetStateAction<({ pagenoteIcon: HTMLElement; contentPagenote: TPagenote; } | undefined)[]>>
+    pagenoteInfo: TPagenote,
+    setAllPagenotesInfo: TSetContentPagenotes
 }
 
 const ToolsButtonGroup = styled(ButtonGroup)(({ theme }) => ({
@@ -32,39 +31,39 @@ const ToolsButtonGroup = styled(ButtonGroup)(({ theme }) => ({
     transform: 'translateX(-50%)',
     gap: 0,
     minHeight: 30,
-    height: 30
+    height: 30,
 }))
 
 
 type TTool = '' | 'setFontColor' | 'setBackgroundColor' | 'setFontBold' | 'setFontItalic' | 'setFontOverline' | 'setFontStrikethrough' | 'setFontUnderline' | 'setCustomStyle' | 'setPagenote' | 'delete'
 type TPagenoteAnchorContext = {
-    contentPagenote:({ pagenoteIcon: HTMLElement; contentPagenote: TPagenote; } ),
-    setAllPagenotesInfo: React.Dispatch<React.SetStateAction<({ pagenoteIcon: HTMLElement; contentPagenote: TPagenote; } | undefined)[]>>,
+    contentPagenote:TPagenote,
+    setAllPagenotesInfo: TSetContentPagenotes,
     tool: TTool,
     setTool: React.Dispatch<React.SetStateAction<TTool>>
 }
 
 export const PagenoteAnchorContext = createContext<TPagenoteAnchorContext | null>(null)
 
-export default function PagenoteIcon(props: TPagenoteIcon) {
+const PagenoteIcon = memo((props: TPagenoteIcon) =>{
     //缓存数据避免重复操作
     const [ pagenoteAnchors, pagenoteIcon, rectInfo] = useMemo(() => {
         //pagenoteAnchors       包含当前pagenoteFragment.textStart文本的一系列节点
-        const pagenoteAnchors = Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${props.pagenoteInfo.contentPagenote.pagenoteID}"]`))
+        const pagenoteAnchors = Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${props.pagenoteInfo.pagenoteID}"]`))
         //pagenoteIcon          pagenoteAnchors节点后面跟随的图标，用于响应后续弹出pagenoteTools
-        const pagenoteIcon = document.querySelector(`pagenoteicon[pagenoteid="${props.pagenoteInfo.contentPagenote.pagenoteID}"]`)
+        const pagenoteIcon = document.querySelector(`pagenoteicon[pagenoteid="${props.pagenoteInfo.pagenoteID}"]`)
         //rectInfo              最后一个节点的宽高信息，主要使用rectInfo.height设置pagenoteTools的位置
         const rectInfo = pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect()
         return [ pagenoteAnchors, pagenoteIcon, rectInfo]
     }, [])
     
     useEffect(()=>{
-        setEleStyle(pagenoteAnchors as HTMLElement[],props.pagenoteInfo.contentPagenote.pagenoteStyle)
-        console.log(props.pagenoteInfo.contentPagenote.pagenoteStyle)
-    },[props.pagenoteInfo.contentPagenote.pagenoteStyle])
+        setEleStyle(pagenoteIcon as HTMLElement,pagenoteAnchors as HTMLElement[],props.pagenoteInfo.pagenoteStyle)
+        console.log(props.pagenoteInfo.pagenoteStyle)
+    },[props.pagenoteInfo.pagenoteStyle])
 
     const [saveContentPagenote,setSaveContentPagenote]=useState(false)
-    const [showTools,setShowTools]=useState(props.pagenoteInfo.contentPagenote.showTools)
+    const [showTools,setShowTools]=useState(props.pagenoteInfo.showTools)
     
     const [tool, setTool] = useState<TTool>('')
 
@@ -87,7 +86,9 @@ export default function PagenoteIcon(props: TPagenoteIcon) {
             setTool('')
             setShowTools(false)
         }else{
-            props.setAllPagenotesInfo(props.allPagenotesInfo.filter(pagenote=>pagenote?.contentPagenote.pagenoteID!=props.pagenoteInfo.contentPagenote.pagenoteID))
+            props.setAllPagenotesInfo(allPagenotesInfo=>{
+                return allPagenotesInfo.filter(pagenote=>pagenote?.contentPagenote.pagenoteID!=props.pagenoteInfo.pagenoteID)
+            })
             pagenoteIcon?.remove()
             pagenoteAnchors.forEach(pagenoteAnchor=>pagenoteAnchor.outerHTML=pagenoteAnchor.innerHTML)
         }
@@ -98,18 +99,16 @@ export default function PagenoteIcon(props: TPagenoteIcon) {
             <Box 
                 sx={{position:'relative',
                     display:'inline-block',
-                    verticalAlign:'bottom',
+                    lineHeight:1,
                 }} 
                 onMouseUp={handlerBoxMouseUp}
             >
                 <DescriptionIcon
                     onClick={e => handlerIconClick(e)}
                     sx={{
-                        width: rectInfo.height,
-                        height: rectInfo.height,
-                        verticalAlign: 'bottom',
-                        color:props.pagenoteInfo.contentPagenote.pagenoteStyle?.color,
-                        backgroundColor:props.pagenoteInfo.contentPagenote.pagenoteStyle?.backgroundColor,
+                        width: rectInfo.height - rectInfo.height/4,
+                        height: rectInfo.height - rectInfo.height/4,
+                        verticalAlign:'bottom',
                     }}>
                 </DescriptionIcon>
                 <ToolsButtonGroup
@@ -132,10 +131,10 @@ export default function PagenoteIcon(props: TPagenoteIcon) {
                         <ToolsSetBackgroundColor />
                         <ToolsSetFontBold />
                         <ToolsSetFontItalic />
-                        {/* <ToolsSetFontOverline />
+                        <ToolsSetFontOverline />
                         <ToolsSetFontStrikethrough />
                         <ToolsSetFontUnderline />
-                        <ToolsSetCustomStyle />
+                        {/* <ToolsSetCustomStyle />
                         <ToolsSetPagenote />
                         <ToolsDelete /> */}
                     </PagenoteAnchorContext.Provider>
@@ -143,10 +142,14 @@ export default function PagenoteIcon(props: TPagenoteIcon) {
             </Box>
         </ClickAwayListener>
         )
-}
+})
 
-function setEleStyle(targetEles:HTMLElement[],style:TPagenoteStyle|undefined){
+export default PagenoteIcon
+
+function setEleStyle(pagenoteIcon:HTMLElement,targetEles:HTMLElement[],style:TPagenoteStyle|undefined){
     if(style==undefined) return
+    pagenoteIcon.style['color']=style['color']??''
+    pagenoteIcon.style['backgroundColor']=style['backgroundColor']??''
     targetEles.forEach(targetEle=>{
         for (let styleAttr in style){
             targetEle.style[styleAttr] = style[styleAttr]??''

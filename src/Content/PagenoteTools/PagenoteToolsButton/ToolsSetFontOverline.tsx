@@ -9,23 +9,48 @@ export default function ToolsSetFontOverline() {
         return <></>
     }
 
-    const {   setTool } = AnchorContext
+    const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
+    const [fontOverline,setFontOverline]=useState(false)
 
+    
+    useEffect(() => {
+        setAllPagenotesInfo(contentPagenotes => {
+            return contentPagenotes.map(pagenote => {
+                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.pagenoteID) {
+                    pagenote = {
+                        ...pagenote,
+                        contentPagenote: {
+                            ...pagenote.contentPagenote,
+                            pagenoteStyle: {
+                                ...pagenote.contentPagenote.pagenoteStyle,
+                                textDecoration: fontOverline?
+                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'')+' overline':
+                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'').replace(/overline/g,'').replace(/[ ]+/g,' ').trim(),
+                            }
+                        }
+                    }
+                }
+                console.log(pagenote)
+                return pagenote
+            })
+        })
+    }, [fontOverline])
 
-    const handlerFontBoldClick = (e: React.MouseEvent) => {
+    const handlerFontOverlineClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
-        setTool('setFontBold')
+        setTool('setFontOverline')
+        setFontOverline(!fontOverline)
     }
 
     return (
         <IconButton
             color='secondary'
-            
+            onClick={handlerFontOverlineClick}
             sx={{ position: 'relative',width:30,height:'100%'  }}
         >
-            <Tooltip title="设置字体颜色" TransitionComponent={Zoom} arrow>
+            <Tooltip title="设置上划线" TransitionComponent={Zoom} arrow>
                 <FormatOverlineIcon > </FormatOverlineIcon>
             </Tooltip>
         </IconButton>)
