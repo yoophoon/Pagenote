@@ -33,6 +33,8 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
         return
     }
 
+    
+
     const pagenote = new PagenoteGeneration(selection)
 
     //生成pagenoteFragment，如果pagenoteFragment未定义则提前返回
@@ -70,7 +72,7 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
         pagenoteID,
         pagenoteIndex: pagenoteNodes.startIndex,
         pagenoteTitle: pagenoteFragment.textStart,
-        pagenoteContent: (pagenoteFragment.prefix ?? '') + pagenoteFragment.textStart + (pagenoteFragment.textEnd + '') + (pagenoteFragment.textEnd ?? ''),
+        pagenoteContent: (pagenoteFragment.prefix ?? '') + pagenoteFragment.textStart + (pagenoteFragment.textEnd??'') + (pagenoteFragment.suffix ?? ''),
         pagenoteTimestamp: new Date().getTime(),
         pagenoteFragment,
         pagenoteTarget: window.location.origin + window.location.pathname,
@@ -109,6 +111,7 @@ function getPagenotePosition(pagenoteEles: HTMLElement[]) {
     if (parentElement == null) return 'error'
 
     const parentElementWidth = parentElement.getBoundingClientRect().width
+    console.log(parentElementWidth)
     if (parentElementWidth >= minWidthAfterPagenoteFragment) {
         return EPosition.afterPagenoteFragment
     }

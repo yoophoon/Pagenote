@@ -12,7 +12,7 @@ export default function ToolsSetBackgroundColor() {
     }
 
     const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
-    const [color,setColor]=useState('')
+    const [color,setColor]=useState(contentPagenote.pagenoteStyle?.backgroundColor)
     const userColorPicker = tool == 'setBackgroundColor' ? <ColorPicker setColor={setColor}></ColorPicker> : null
     
     useEffect(() => {

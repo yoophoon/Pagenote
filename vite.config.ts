@@ -12,6 +12,7 @@ const manifest = defineManifest({
     "sidePanel",
     "tabs",
     "runtime",
+    "offscreen"
   ],
   "action": {
     "default_popup": "index.html",
@@ -23,7 +24,7 @@ const manifest = defineManifest({
     ],
     "matches": [
       "<all_urls>"
-    ]
+    ],
   }],
   "options_page": "options.html",
   "side_panel": {
@@ -35,6 +36,13 @@ const manifest = defineManifest({
    "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },
+  "web_accessible_resources":[
+    {
+      "resources":["*"],
+      "matches":["<all_urls>"],
+      "use_dynamic_url":true,
+    }
+  ]
 })
 
 // https://vitejs.dev/config/
@@ -48,6 +56,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         Home: path.resolve(__dirname, 'home.html'),
+        OffScreenHTML:path.resolve(__dirname,'offScreenHTML.html')
       },
     },
   },

@@ -1,8 +1,9 @@
 import { ButtonGroup, IconButton, SvgIcon, Tooltip, Zoom } from '@mui/material'
-import SetTable from '../../assets/svg/Table'
+import SetTable from '../../../assets/svg/Table'
 import { FormatListNumbered } from '@mui/icons-material'
 // import EditorSaveContent from './EditorSaveContent'
 import EditorMarkup from './EditorRenderMarkup'
+import EditorClose from './EditorClose'
 export default function EditorToolBar() {
     return (
         <ButtonGroup>
@@ -34,21 +35,14 @@ export default function EditorToolBar() {
             <EditorToolSplit />
             <EditorMarkup />
             <EditorToolSplit />
+            <EditorClose />
             {/* <EditorSaveContent /> */}
         </ButtonGroup>)
 }
 
-import SetHead from '../../assets/svg/Head'
-function EditorSetHead() {
-    return (
-        <Tooltip title="标题" TransitionComponent={Zoom} arrow>
-            <IconButton edge="start" color='secondary'>
-                <SvgIcon component={SetHead} inheritViewBox fontSize="small" />
-            </IconButton>
-        </Tooltip>)
-}
 
-import SetBold from '../../assets/svg/Bold'
+
+import SetBold from '../../../assets/svg/Bold'
 function EditorSetBold() {
     return (
         <Tooltip title="加粗" TransitionComponent={Zoom} arrow>
@@ -58,7 +52,7 @@ function EditorSetBold() {
         </Tooltip>)
 }
 
-import SetItaly from '../../assets/svg/Italy'
+import SetItaly from '../../../assets/svg/Italy'
 function EditorSetItaly() {
     return (
         <Tooltip title="斜体" TransitionComponent={Zoom} arrow>
@@ -68,7 +62,7 @@ function EditorSetItaly() {
         </Tooltip>)
 }
 
-import SetDeleteline from '../../assets/svg/Deleteline'
+import SetDeleteline from '../../../assets/svg/Deleteline'
 function EditorSetDeleteline() {
     return (
         <Tooltip title="删除线" TransitionComponent={Zoom} arrow>
@@ -78,7 +72,7 @@ function EditorSetDeleteline() {
         </Tooltip>)
 }
 
-import SetLink from '../../assets/svg/Link'
+import SetLink from '../../../assets/svg/Link'
 function EditorSetSetLink() {
     return (
         <Tooltip title="超链接" TransitionComponent={Zoom} arrow>
@@ -88,7 +82,7 @@ function EditorSetSetLink() {
         </Tooltip>)
 }
 
-import ToolSplit from '../../assets/svg/Verticalline'
+import ToolSplit from '../../../assets/svg/Verticalline'
 function EditorToolSplit() {
     return (
         <IconButton edge="start" disabled>
@@ -98,7 +92,7 @@ function EditorToolSplit() {
 }
 
 
-import SetUL from '../../assets/svg/Unorderlist'
+import SetUL from '../../../assets/svg/Unorderlist'
 function EditorSetUL() {
     return (
         <Tooltip title="无序列表" TransitionComponent={Zoom} arrow>
@@ -117,7 +111,7 @@ function EditorSetOL() {
         </Tooltip>)
 }
 
-import SetCheckItem from '../../assets/svg/Checkedbox'
+import SetCheckItem from '../../../assets/svg/Checkedbox'
 function EditorSetCheckItem() {
     return (
         <Tooltip title="待办" TransitionComponent={Zoom} arrow>
@@ -127,7 +121,7 @@ function EditorSetCheckItem() {
         </Tooltip>)
 }
 
-import SetReference from '../../assets/svg/Reference'
+import SetReference from '../../../assets/svg/Reference'
 function EditorSetReference() {
     return (
         <Tooltip title="引用" TransitionComponent={Zoom} arrow>
@@ -137,7 +131,7 @@ function EditorSetReference() {
         </Tooltip>)
 }
 
-import SetHr from '../../assets/svg/Line'
+import SetHr from '../../../assets/svg/Line'
 function EditorSetHr() {
     return (
         <Tooltip title="分割线" TransitionComponent={Zoom} arrow>
@@ -147,7 +141,7 @@ function EditorSetHr() {
         </Tooltip>)
 }
 
-import SetCodeBlock from '../../assets/svg/Codeblock'
+import SetCodeBlock from '../../../assets/svg/Codeblock'
 function EditorSetCodeBlock() {
     return (
         <Tooltip title="块代码" TransitionComponent={Zoom} arrow>
@@ -157,7 +151,8 @@ function EditorSetCodeBlock() {
         </Tooltip>)
 }
 
-import SetCodeInline from '../../assets/svg/Codeinline'
+import SetCodeInline from '../../../assets/svg/Codeinline'
+import EditorSetHead from './EditorSetHead'
 function EditorSetCodeInline() {
     return (
         <Tooltip title="行内代码" TransitionComponent={Zoom} arrow>

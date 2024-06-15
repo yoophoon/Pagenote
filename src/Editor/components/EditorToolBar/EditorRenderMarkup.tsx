@@ -1,8 +1,8 @@
 import { IconButton, SvgIcon, Tooltip, Zoom } from "@mui/material";
-import SvgMarkup from "../../assets/svg/Markup";
-import SvgMarkdown from "../../assets/svg/Markdown";
+import SvgMarkup from "../../../assets/svg/Markup";
+import SvgMarkdown from "../../../assets/svg/Markdown";
 import { useRef, useState } from "react";
-import { markUpStr } from "../../lib/markUp";
+import { markUpStr } from "../../../lib/markUp";
 
 export default function EditorMarkup() {
     const [contentFormat, setContentFormat] = useState({

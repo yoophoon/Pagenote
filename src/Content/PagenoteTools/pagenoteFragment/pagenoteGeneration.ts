@@ -452,7 +452,7 @@ export class PagenoteGeneration {
 
 
 //非目标标签元素和目标标签元素，用于过滤标签
-const NonTargetedEle: string[] = ['SCRIPT', 'LINK', 'STYLE']
+const NonTargetedEle: string[] = ['SCRIPT', 'LINK', 'STYLE', 'PAGENOICON']
 const TargetedEle: string[] = []
 
 

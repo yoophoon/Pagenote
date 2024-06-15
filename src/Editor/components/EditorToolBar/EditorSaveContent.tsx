@@ -1,8 +1,8 @@
 import { IconButton, SvgIcon, Tooltip, Zoom } from '@mui/material'
-import { Save } from '../../assets/svg'
+import { Save } from '../../../assets/svg'
 import { useContext } from 'react'
-import { TPagenoteFragment } from '../../pagenoteTypes'
-import { EditorContext } from '..'
+import { TPagenoteFragment } from '../../../pagenoteTypes'
+import { EditorContext } from '../..'
 export default function EditorSaveContent() {
     const { openEditor, pagenoteID, pagenoteFragment } = useContext(EditorContext)
 

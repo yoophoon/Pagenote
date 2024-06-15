@@ -14,7 +14,7 @@ import { useContext, useEffect, useState } from 'react'
 // import rehypeSlug from 'rehype-slug'
 // import remarkGfm from 'remark-gfm'
 // import remarkToc from 'remark-toc'
-import { EOperation, ERenderTarget } from '../pagenoteTypes'
+import { EOperation, ERenderTarget } from '../../pagenoteTypes'
 import '@wooorm/starry-night/style/both'
 
 const MarkdownPresentation = styled('div')(({ theme }) => ({
@@ -55,10 +55,10 @@ const UserTextArea = styled('textarea')(({ theme }) => ({
     color: "#00000000",
     width: 700,
     height: 'fit-content',
-    minHeight: 700,
-    lineHeight: 1,
     position: 'absolute',
     inset: 0,
+    minHeight: 700,
+    lineHeight: 1,
     resize: 'none',
     backgroundColor: '#00000000',
     fontSize: theme.typography.fontSize,
@@ -91,6 +91,9 @@ export default function EditorContent() {
     })
     const [renderPort, setRenderPort] = useState<chrome.runtime.Port>()
 
+    const handlerSelect=(e:React.SyntheticEvent<HTMLTextAreaElement, Event>)=>{
+        console.log('select event',e)
+    }
 
     useEffect(() => {
         const renderPort = chrome.runtime.connect({ name: 'renderport' })
@@ -121,6 +124,7 @@ export default function EditorContent() {
             className="write"
             value={vfile.content}
             rows={vfile.content.split('\n').length + 1}
+            onSelect={e=>handlerSelect(e)}
             onChange={function (event) {
                 console.log(event)
                 console.log(vfile)
@@ -134,6 +138,7 @@ export default function EditorContent() {
                     })
                 }
             }} />
+        
     </EditorContentContainer>)
 }
 

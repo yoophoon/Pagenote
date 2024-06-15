@@ -45,11 +45,24 @@ import { nodesInline } from './lib'
 //     }
 // })
 
+// const bg = chrome.extension.getBackgroundPage();'bg',bg,
+// const views=chrome.extension.getViews();
+// console.log('views',views)
+
+const pnChannel=new BroadcastChannel('pagenoteChannel')
+pnChannel.onmessage=e=>{
+    console.log(e)
+}
+
 const extensionURL = chrome.runtime.getURL('')
 
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
     const { operation } = message
+    await setupOffscreenDocument('offScreenHTML.html',()=>{
+            
+    })
+    
     if (operation == EOperation.openNotesInSidepanel) {
         //background无法使用window对象，这里通过message获取其他区域脚本传过来的origin
         //方便作为sidepanel的地址
@@ -85,6 +98,22 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         console.log(message.value.origin)
         sendResponse({ pagenotes: ['pagenotes'] })
         return true
+    } else if(operation=='imgfile'){
+        console.log(message)
+        // await chrome.offscreen.createDocument({
+        //     url:`offScreenHTML.html`,
+        //     reasons:[chrome.offscreen.Reason.BLOBS],
+        //     justification:"generate objectURL"
+        // })
+        
+        chrome.runtime.sendMessage({
+            operation: 'generateObjectURL',
+            fileURL: message.fileURL,
+        },response=>{
+            console.log(response)
+            sendResponse(response)
+        })
+        return true
     }
 
 
@@ -95,6 +124,41 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     // }
 
 })
+
+
+
+let creating:Promise<void>|null; // A global promise to avoid concurrency issues
+async function setupOffscreenDocument(path: string,callBack:()=>void) {
+    // Check all windows controlled by the service worker to see if one
+    // of them is the offscreen document with the given path
+    const offscreenUrl = chrome.runtime.getURL(path);
+    const existingContexts = await chrome.runtime.getContexts({
+        contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
+        documentUrls: [offscreenUrl]
+    });
+
+    if (existingContexts.length > 0) {
+        callBack()
+        return;
+    }
+
+    // create offscreen document
+    if (creating) {
+        await creating;
+        callBack()
+    } else {
+        creating = chrome.offscreen.createDocument({
+            url: path,
+            reasons: [chrome.offscreen.Reason.BLOBS],
+            justification: 'generate object URL',
+        });
+        await creating;
+        callBack()
+        creating = null;
+    }
+}
+
+
 
 chrome.runtime.onConnect.addListener(function (port) {
     port.onMessage.addListener(function (message) {
@@ -109,3 +173,54 @@ chrome.runtime.onConnect.addListener(function (port) {
         }
     });
 })
+
+
+import Dexie, { type EntityTable } from 'dexie'
+
+interface user {
+    id:number;
+    name:string;
+    username:string;
+    email:string[],
+    address:{
+        city:string,
+        country:string,
+    }
+    
+}
+
+var db = new Dexie("FriendsAndPetsDatabase") as Dexie & {
+    users:EntityTable<
+    user,
+    'id'
+    >
+};
+db.version(1).stores({
+    users: "++id, name, &username, *email, address.city",
+    relations: "++, userId1, userId2, [userId1+userId2], relation",
+});
+db.open().catch(function (e) {
+    console.error("Open failed: " + e.stack);
+})
+db.transaction('rw', db.users, function () {
+    db.users.add({
+            name: "Zlatan",
+            username: "ibra",
+            email: ["zlatan@ibrahimovic.se", "zlatan.ibrahimovic@gmail.com"],
+            address: {
+                city: "Malmö",
+                country: "Sweden"
+            }
+        });
+    db.users.where("email")
+        .startsWith("zlatan")
+        .or("address.city")
+        .anyOf(["Malmö", "Stockholm", "Barcelona"])
+        .each(function (user) {
+            console.log("Found user: " + user.name);
+        });
+}).catch(function (e) {
+    console.error(e);
+})
+
+

@@ -10,7 +10,7 @@ export default function ToolsSetFontItalic() {
     }
 
     const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
-    const [fontItalic,setFontItalic]=useState(false)
+    const [fontItalic,setFontItalic]=useState(contentPagenote.pagenoteStyle?.fontStyle)
 
     
     useEffect(() => {
@@ -23,7 +23,7 @@ export default function ToolsSetFontItalic() {
                             ...pagenote.contentPagenote,
                             pagenoteStyle: {
                                 ...pagenote.contentPagenote.pagenoteStyle,
-                                fontStyle: fontItalic?'italic':'normal',
+                                fontStyle: fontItalic,
                             }
                         }
                     }
@@ -38,7 +38,7 @@ export default function ToolsSetFontItalic() {
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
         setTool('setFontItalic')
-        setFontItalic(!fontItalic)
+        setFontItalic(fontItalic=='italic'?'normal':'italic')
     }
 
     return (

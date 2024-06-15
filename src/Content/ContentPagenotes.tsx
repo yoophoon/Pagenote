@@ -24,36 +24,36 @@ export default function ContentPagenotes()
     },[])
     console.log(pagenotesInfo)
     return (<>
-        {pagenotesInfo.map(pagenoteInfo=>{
-            console.log(pagenoteInfo&&
-                pagenoteInfo.pagenoteIcon==undefined&&
+        {pagenotesInfo.map((pagenoteInfo,index) => {
+            console.log(pagenoteInfo &&
+                pagenoteInfo.pagenoteIcon == undefined &&
                 pagenoteInfo.contentPagenote.showEditor)
-            return (
-                pagenoteInfo&&
-                pagenoteInfo.pagenoteIcon&&
-                createPortal(
+            const contentPagenote=pagenotesInfo[index]
+            if (!contentPagenote) return
+            else
+                console.log('contentpagenote',
+                    pagenoteInfo &&
+                    pagenoteInfo.pagenoteIcon &&
+                    createPortal(
                     <PagenoteIcon
                         key={pagenoteInfo.contentPagenote.pagenoteID}
-                        pagenoteInfo={pagenoteInfo.contentPagenote}
+                        contentPagenote={contentPagenote.contentPagenote}
                         setAllPagenotesInfo={setPagenotesInfo}
-                        >
-                    </PagenoteIcon>,
-                    pagenoteInfo.pagenoteIcon
+                    />,
+                    pagenoteInfo.pagenoteIcon, pagenoteInfo.contentPagenote.pagenoteID.toString()
+                ))
+                return (
+                    pagenoteInfo &&
+                    pagenoteInfo.pagenoteIcon &&
+                    createPortal(
+                        <PagenoteIcon
+                            key={pagenoteInfo.contentPagenote.pagenoteID}
+                            contentPagenote={contentPagenote.contentPagenote}
+                            setAllPagenotesInfo={setPagenotesInfo}
+                        />,
+                        pagenoteInfo.pagenoteIcon, pagenoteInfo.contentPagenote.pagenoteID.toString()
+                    )
                 )
-            )||(pagenoteInfo&&
-                pagenoteInfo.pagenoteIcon==undefined&&
-                pagenoteInfo.contentPagenote.showEditor&&
-                createPortal(
-                    // <EditorInPage
-                    //     key={pagenoteInfo.contentPagenote.pagenoteID}
-                    //     pagenoteInfo={pagenoteInfo.contentPagenote}
-                    //     setAllPagenotesInfo={setPagenotesInfo}
-                    //     >
-                    // </EditorInPage>
-                    <div>hello world</div>,
-                    document.body
-                )
-            )
         })}
     </>)
 }
@@ -106,7 +106,6 @@ function presentPagenotes(contentPagenotes: TPagenote[])
  * save
  */
 import tryToGeneratePagenote , { selectEles } from "./PagenoteTools/pagenoteFragment"
-import EditorInPage from "../Editor/EditorInPage"
 
 
 function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
@@ -119,6 +118,21 @@ function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
     pagenoteEles.forEach(pagenoteEle=>pagenoteEle.setAttribute('pagenoteid',contentPagenote.pagenoteID.toString()))
     const pagenoteIcon=document.createElement('pagenoteIcon')
     pagenoteIcon.setAttribute('pagenoteid',contentPagenote.pagenoteID.toString())
+    pagenoteIcon.style.position='relative'
+    pagenoteIcon.draggable=false
+    pagenoteIcon.onclick=e=>{
+        // e.stopPropagation();
+        e.preventDefault()
+    }
+    pagenoteIcon.ondrop=e=>{
+        e.preventDefault()
+        e.stopPropagation()
+    }
+    
+    pagenoteIcon.onmouseup=e=>{
+        e.preventDefault()
+        e.stopPropagation()
+    }
     //调整位置
     pagenoteEles[pagenoteEles.length - 1].parentNode?.insertBefore(pagenoteIcon, pagenoteEles[pagenoteEles.length - 1])
     pagenoteEles[pagenoteEles.length - 1].parentNode?.insertBefore(pagenoteEles[pagenoteEles.length - 1], pagenoteIcon)
@@ -127,7 +141,11 @@ function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
     setPagenotesInfo(pagenotesInfo => {
         //检查选中的内容是否已经在之前生成过pagenoe
         for (let i = 0; i < pagenotesInfo.length; i++) {
-            if (pagenotesInfo[i]?.contentPagenote.pagenoteContent == contentPagenote.pagenoteContent) {
+          const initContent = pagenotesInfo[i]?.contentPagenote.pagenoteFragment?.prefix ?? '' +
+                              pagenotesInfo[i]?.contentPagenote.pagenoteFragment?.textStart ?? '' +
+                              pagenotesInfo[i]?.contentPagenote.pagenoteFragment?.textEnd ?? '' +
+                              pagenotesInfo[i]?.contentPagenote.pagenoteFragment?.suffix ?? ''
+            if (initContent == contentPagenote.pagenoteContent) {
                 pagenoteEles.forEach(pagenoteEle => pagenoteEle.outerHTML = pagenoteEle.innerHTML)
                 pagenoteIcon.remove()
                 selectEles(Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${pagenotesInfo[i]?.contentPagenote.pagenoteID}"]`)))
@@ -140,6 +158,7 @@ function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
             contentPagenote: {
                 ...contentPagenote,
                 showTools:true,
+                showEditor:false,
             }
         }]
     })

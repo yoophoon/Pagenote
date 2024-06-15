@@ -2,6 +2,7 @@ import { IconButton, Tooltip, Zoom } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
+import { EOperation } from "../../../pagenoteTypes";
 
 export default function ToolsSetFontUnderline() {
     const AnchorContext = useContext(PagenoteAnchorContext)
@@ -10,7 +11,7 @@ export default function ToolsSetFontUnderline() {
     }
 
     const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
-    const [fontUnderline,setFontUnderline]=useState(false)
+    const [fontUnderline,setFontUnderline]=useState(contentPagenote.pagenoteStyle?.fontStyle)
 
     
     useEffect(() => {
@@ -41,7 +42,11 @@ export default function ToolsSetFontUnderline() {
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
         setTool('setFontUnderline')
-        setFontUnderline(!fontUnderline)
+        setFontUnderline(fontUnderline?.includes('underline')?fontUnderline.replace(/underline/g,'').replace(/[ ]+/g,' ').trim():(fontUnderline??'')+' underline')
+
+        chrome.runtime.sendMessage({operation:EOperation.sidePanel,value:"fuck sidepanel"},response=>{
+            console.log(response)
+        })
     }
 
     return (

@@ -1,5 +1,6 @@
 import ReactDOM from "react-dom/client";
 import ContentPagenotes from "./ContentPagenotes";
+import { useRef } from "react";
 
 
 //创建react管理容器
@@ -34,7 +35,9 @@ document.documentElement.append(PagenoteEditor)
 
 
 
-
+document.body.ondragstart=e=>{
+    console.log(e)
+}
 
 
 
@@ -153,6 +156,84 @@ document.documentElement.append(PagenoteEditor)
 //         alert('hello pagenoteIcon')
 //     }
 //     return { pagenoteIcon, pagenoteIconRoot }
+// }
+
+
+//不能跨源
+const pnChannel=new BroadcastChannel('pagenoteChannel')
+pnChannel.onmessage=e=>{
+    console.log(e)
+}
+
+// const testUploadFile=document.createElement('div')
+// document.documentElement.append(testUploadFile)
+// ReactDOM.createRoot(testUploadFile).render(<>
+//   <UpLoadImg></UpLoadImg>
+// </>)
+
+// function UpLoadImg(){
+//   // const inputRef=useRef()
+//   const handlerFileSelectClick = (e: React.MouseEvent) => {
+//     const fileElem=document.querySelector('#fileElem') as HTMLElement
+//     if (fileElem) {
+//       fileElem.click();
+//     }
+//     e.preventDefault(); // 避免导航至“#”
+//   }
+
+//   const handleInputChange=()=>{
+
+//     const fileElem = document.getElementById("fileElem") as HTMLInputElement,
+//           fileList = document.getElementById("fileList")
+
+//     if (fileList && fileElem && !fileElem.files?.length) {
+//       fileList.innerHTML = "<p>没有选择任何文件！</p>";
+//     } else if(fileList && fileElem &&fileElem.files) {
+//       fileList.innerHTML = "";
+//       const list = document.createElement("ul");
+//       fileList.appendChild(list);
+//       for (let i = 0; i < fileElem.files.length; i++) {
+//         const li = document.createElement("li");
+//         list.appendChild(li);
+//         const img = document.createElement("img");
+//         img.src = URL.createObjectURL(fileElem.files[i]);
+//         chrome.runtime.sendMessage({
+//           operation: 'imgfile',
+//           fileURL: img.src
+//         }
+//         ,
+//         async response=>{
+//           const anotherIMG=document.createElement('img')
+//           anotherIMG.src=URL.createObjectURL(await (await fetch(response.response)).blob())
+//           // response.response
+//           anotherIMG.alt='同一张图片不同的url'
+//           anotherIMG.crossOrigin='anonymous'
+//           document.documentElement.append(anotherIMG)
+//         }
+//         )
+//         console.log(img.src)
+//         console.log(fileElem.files[i])
+//         img.height = 60;
+//         // img.onload = () => {
+//         //   URL.revokeObjectURL(img.src);
+//         // };
+//         li.appendChild(img);
+//         const info = document.createElement("span");
+//         info.innerHTML = `${fileElem.files[i].name}: ${fileElem.files[i].size} bytes`;
+//         li.appendChild(info);
+//       }
+//     }
+//   }
+
+// return (<>
+//     <input type="file" id="fileElem" multiple accept="image/*" style={{display:"none"}}
+//       onChange={handleInputChange}></input>
+//     <a href="#" id="fileSelect" onClick={e=>handlerFileSelectClick(e)}>选择一些文件</a>
+//     <div id="fileList">
+//       <p>没有选择文件</p>
+//     </div>
+//     <img src="blob:https://dexie.org/66098b08-4b4b-4e22-a5c1-cfe4ad78802b"></img>
+//   </>)
 // }
 
 

@@ -15,6 +15,7 @@ export enum EOperation {
     savePagenote,
     getPagenotes,
     render,
+    sidePanel
 }
 
 export enum EPosition {

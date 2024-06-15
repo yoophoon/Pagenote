@@ -12,7 +12,7 @@ export default function ToolsSetFontColor() {
     }
 
     const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
-    const [color,setColor]=useState('')
+    const [color,setColor]=useState(contentPagenote.pagenoteStyle?.color)
     const userColorPicker = tool == 'setFontColor' ? <ColorPicker setColor={setColor}></ColorPicker> : null
     
     useEffect(() => {

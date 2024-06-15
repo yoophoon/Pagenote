@@ -10,7 +10,7 @@ export default function ToolsSetFontBold() {
     }
 
     const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
-    const [fontBold,setFontBold]=useState(false)
+    const [fontBold,setFontBold]=useState(contentPagenote.pagenoteStyle?.fontWeight)
 
     
     useEffect(() => {
@@ -23,7 +23,7 @@ export default function ToolsSetFontBold() {
                             ...pagenote.contentPagenote,
                             pagenoteStyle: {
                                 ...pagenote.contentPagenote.pagenoteStyle,
-                                fontWeight: fontBold?'bold':'normal',
+                                fontWeight: fontBold,
                             }
                         }
                     }
@@ -38,7 +38,7 @@ export default function ToolsSetFontBold() {
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
         setTool('setFontBold')
-        setFontBold(!fontBold)
+        setFontBold(fontBold=='bold'?'normal':'bold')
     }
 
     return (

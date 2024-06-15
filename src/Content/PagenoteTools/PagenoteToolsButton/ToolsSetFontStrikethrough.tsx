@@ -10,7 +10,7 @@ export default function ToolsSetFontStrikethrough() {
     }
 
     const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
-    const [fontStrikethrough,setFontStrikethrough]=useState(false)
+    const [fontStrikethrough,setFontStrikethrough]=useState(contentPagenote.pagenoteStyle?.fontStyle)
 
     
     useEffect(() => {
@@ -41,7 +41,7 @@ export default function ToolsSetFontStrikethrough() {
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
         setTool('setFontStrikethrough')
-        setFontStrikethrough(!fontStrikethrough)
+        setFontStrikethrough(fontStrikethrough?.includes('line-through')?fontStrikethrough.replace(/line-through/g,'').replace(/[ ]+/g,' ').trim():(fontStrikethrough??'')+' line-through')
     }
 
     return (

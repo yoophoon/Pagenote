@@ -10,7 +10,7 @@ export default function ToolsSetFontOverline() {
     }
 
     const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
-    const [fontOverline,setFontOverline]=useState(false)
+    const [fontOverline,setFontOverline]=useState(contentPagenote.pagenoteStyle?.textDecoration)
 
     
     useEffect(() => {
@@ -23,25 +23,23 @@ export default function ToolsSetFontOverline() {
                             ...pagenote.contentPagenote,
                             pagenoteStyle: {
                                 ...pagenote.contentPagenote.pagenoteStyle,
-                                textDecoration: fontOverline?
-                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'')+' overline':
-                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'').replace(/overline/g,'').replace(/[ ]+/g,' ').trim(),
+                                textDecoration: fontOverline,
                             }
                         }
                     }
                 }
-                console.log(pagenote)
+                console.log('overline',pagenote?.contentPagenote.pagenoteID)
                 return pagenote
             })
         })
     }, [fontOverline])
-
+    console.log('overline++++++++',fontOverline,contentPagenote.pagenoteID)
     const handlerFontOverlineClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
         setTool('setFontOverline')
-        setFontOverline(!fontOverline)
+        setFontOverline(fontOverline?.includes('overline')?fontOverline?.replace(/overline/g,'').replace(/[ ]+/g,' ').trim():(fontOverline??'')+' overline')
     }
 
     return (

@@ -9,25 +9,35 @@ export default function ToolsDelete() {
         return <></>
     }
 
-    const { contentPagenote, setAllPagenotesInfo,  setTool } = AnchorContext
+    const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
 
-
-
-    const handlerFontBoldClick = (e: React.MouseEvent) => {
+    const handlerDeleteClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
-        setTool('setFontBold')
+        setAllPagenotesInfo(contentPagenotes => {
+            return contentPagenotes.filter(pagenote=>pagenote?.contentPagenote.pagenoteID!=contentPagenote.pagenoteID)
+        })
+        deleteAnchorAndIcon(contentPagenote.pagenoteID)
+        setTool('delete')
     }
 
     return (
         <IconButton
             color='secondary'
+            onClick={handlerDeleteClick}
             sx={{ position: 'relative',width:30,height:'100%' }}
         >
-            <Tooltip title="设置字体颜色" TransitionComponent={Zoom} arrow>
+            <Tooltip title="删除pagenote" TransitionComponent={Zoom} arrow>
                 <DeleteForeverIcon > </DeleteForeverIcon>
             </Tooltip>
         </IconButton>)
 }
 
+
+function deleteAnchorAndIcon(pagenoteID:number){
+    const pagenoteanchors=document.querySelectorAll(`pagenoteanchor[pagenoteid="${pagenoteID}"]`)
+    const pagenoteicon=document.querySelector(`pagenoteicon[pagenoteid="${pagenoteID}"]`)
+    pagenoteanchors.forEach(pagenoteanchor=>pagenoteanchor.outerHTML=pagenoteanchor.innerHTML)
+    pagenoteicon?.remove()
+}
