@@ -11,28 +11,18 @@ export default function ToolsSetFontColor() {
         return <></>
     }
 
-    const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
+    const { contentPagenote,setContentPagenote,tool, setTool } = AnchorContext
     const [color,setColor]=useState(contentPagenote.pagenoteStyle?.color)
     const userColorPicker = tool == 'setFontColor' ? <ColorPicker setColor={setColor}></ColorPicker> : null
     
     useEffect(() => {
-        setAllPagenotesInfo(contentPagenotes => {
-            return contentPagenotes.map(pagenote => {
-                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.pagenoteID) {
-                    pagenote = {
-                        ...pagenote,
-                        contentPagenote: {
-                            ...pagenote.contentPagenote,
-                            pagenoteStyle: {
-                                ...pagenote.contentPagenote.pagenoteStyle,
-                                color: color,
-                            }
-                        }
-                    }
-                }
-                return pagenote
-            })
-        })
+        setContentPagenote(contentPagenote=>({
+            ...contentPagenote,
+            pagenoteStyle:{
+                ...contentPagenote.pagenoteStyle,
+                backgroundColor:color,
+            }
+        }))
     }, [color])
 
     const handlerFontColorClick = (e: React.MouseEvent) => {

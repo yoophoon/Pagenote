@@ -9,31 +9,19 @@ export default function ToolsSetFontStrikethrough() {
         return <></>
     }
 
-    const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
+    const { contentPagenote,setContentPagenote, setTool } = AnchorContext
     const [fontStrikethrough,setFontStrikethrough]=useState(contentPagenote.pagenoteStyle?.fontStyle)
 
     
     useEffect(() => {
-        setAllPagenotesInfo(contentPagenotes => {
-            return contentPagenotes.map(pagenote => {
-                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.pagenoteID) {
-                    pagenote = {
-                        ...pagenote,
-                        contentPagenote: {
-                            ...pagenote.contentPagenote,
-                            pagenoteStyle: {
-                                ...pagenote.contentPagenote.pagenoteStyle,
-                                textDecoration: fontStrikethrough?
-                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'')+' line-through':
-                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'').replace(/line-through/g,'').replace(/[ ]+/g,' ').trim(),
-                            }
-                        }
-                    }
+        setContentPagenote(contentPagenote=>({
+            ...contentPagenote,
+                pagenoteStyle: {
+                    ...contentPagenote.pagenoteStyle,
+                    textDecoration: fontStrikethrough,
                 }
-                console.log(pagenote)
-                return pagenote
             })
-        })
+        )
     }, [fontStrikethrough])
 
     const handlerFontStrikethroughClick = (e: React.MouseEvent) => {

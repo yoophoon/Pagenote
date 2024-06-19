@@ -9,29 +9,19 @@ export default function ToolsSetFontOverline() {
         return <></>
     }
 
-    const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
+    const { contentPagenote, setContentPagenote, setTool } = AnchorContext
     const [fontOverline,setFontOverline]=useState(contentPagenote.pagenoteStyle?.textDecoration)
 
     
     useEffect(() => {
-        setAllPagenotesInfo(contentPagenotes => {
-            return contentPagenotes.map(pagenote => {
-                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.pagenoteID) {
-                    pagenote = {
-                        ...pagenote,
-                        contentPagenote: {
-                            ...pagenote.contentPagenote,
-                            pagenoteStyle: {
-                                ...pagenote.contentPagenote.pagenoteStyle,
-                                textDecoration: fontOverline,
-                            }
-                        }
-                    }
+        setContentPagenote(contentPagenote=>({
+            ...contentPagenote,
+                pagenoteStyle: {
+                    ...contentPagenote.pagenoteStyle,
+                    textDecoration: fontOverline,
                 }
-                console.log('overline',pagenote?.contentPagenote.pagenoteID)
-                return pagenote
             })
-        })
+        )
     }, [fontOverline])
     console.log('overline++++++++',fontOverline,contentPagenote.pagenoteID)
     const handlerFontOverlineClick = (e: React.MouseEvent) => {

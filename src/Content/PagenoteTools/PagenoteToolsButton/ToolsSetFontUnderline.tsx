@@ -10,31 +10,19 @@ export default function ToolsSetFontUnderline() {
         return <></>
     }
 
-    const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
+    const { contentPagenote,setContentPagenote, setTool } = AnchorContext
     const [fontUnderline,setFontUnderline]=useState(contentPagenote.pagenoteStyle?.fontStyle)
 
     
     useEffect(() => {
-        setAllPagenotesInfo(contentPagenotes => {
-            return contentPagenotes.map(pagenote => {
-                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.pagenoteID) {
-                    pagenote = {
-                        ...pagenote,
-                        contentPagenote: {
-                            ...pagenote.contentPagenote,
-                            pagenoteStyle: {
-                                ...pagenote.contentPagenote.pagenoteStyle,
-                                textDecoration: fontUnderline?
-                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'')+' underline':
-                                                (pagenote.contentPagenote.pagenoteStyle?.textDecoration??'').replace(/underline/g,'').replace(/[ ]+/g,' ').trim(),
-                            }
-                        }
-                    }
+        setContentPagenote(contentPagenote=>({
+            ...contentPagenote,
+                pagenoteStyle: {
+                    ...contentPagenote.pagenoteStyle,
+                    textDecoration: fontUnderline,
                 }
-                console.log(pagenote)
-                return pagenote
             })
-        })
+        )
     }, [fontUnderline])
 
     const handlerFontUnderlineClick = (e: React.MouseEvent) => {

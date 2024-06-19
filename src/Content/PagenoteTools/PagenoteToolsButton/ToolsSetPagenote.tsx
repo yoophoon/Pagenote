@@ -10,28 +10,18 @@ export default function ToolsSetPagenote() {
         return <></>
     }
 
-    const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
+    const { contentPagenote,setContentPagenote,tool, setTool } = AnchorContext
 
     const handlerSetPagenote = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
-        setAllPagenotesInfo(contentPagenotes => {
-            return contentPagenotes.map(pagenote=>{
-                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.pagenoteID) {
-                    pagenote={
-                        ...pagenote,
-                        contentPagenote:{
-                            ...pagenote.contentPagenote,
-                            showTools:false,
-                            showEditor:true,
-                        }
-                    }
-                    console.log(pagenote)
-                    return pagenote
-                }
+        setContentPagenote(contentPagenote=>({
+            ...contentPagenote,
+            showEditor:true,
+            showTools:false,
             })
-        })
+        )
         setTool('setPagenote')
     }
 

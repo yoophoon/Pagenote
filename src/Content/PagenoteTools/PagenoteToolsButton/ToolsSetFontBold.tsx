@@ -9,28 +9,18 @@ export default function ToolsSetFontBold() {
         return <></>
     }
 
-    const { contentPagenote,setAllPagenotesInfo,tool, setTool } = AnchorContext
+    const { contentPagenote, setContentPagenote, setTool } = AnchorContext
     const [fontBold,setFontBold]=useState(contentPagenote.pagenoteStyle?.fontWeight)
 
     
     useEffect(() => {
-        setAllPagenotesInfo(contentPagenotes => {
-            return contentPagenotes.map(pagenote => {
-                if (pagenote && pagenote?.contentPagenote.pagenoteID == contentPagenote?.pagenoteID) {
-                    pagenote = {
-                        ...pagenote,
-                        contentPagenote: {
-                            ...pagenote.contentPagenote,
-                            pagenoteStyle: {
-                                ...pagenote.contentPagenote.pagenoteStyle,
-                                fontWeight: fontBold,
-                            }
-                        }
-                    }
-                }
-                return pagenote
-            })
-        })
+        setContentPagenote(contentPagenote=>({
+            ...contentPagenote,
+            pagenoteStyle:{
+                ...contentPagenote.pagenoteStyle,
+                fontWeight:fontBold
+            }
+        }))
     }, [fontBold])
 
     const handlerFontBoldClick = (e: React.MouseEvent) => {
