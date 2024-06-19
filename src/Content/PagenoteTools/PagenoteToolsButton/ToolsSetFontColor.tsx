@@ -5,22 +5,26 @@ import { ColorPicker } from "../../../Components/ColorPicker";
 
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 
-export default function ToolsSetFontColor() {
+type fontColor={
+    fontColor:string|undefined
+  }
+
+export default function ToolsSetFontColor({fontColor}:fontColor) {
     const AnchorContext = useContext(PagenoteAnchorContext)
     if (AnchorContext == null) {
         return <></>
     }
 
-    const { contentPagenote,setContentPagenote,tool, setTool } = AnchorContext
-    const [color,setColor]=useState(contentPagenote.pagenoteStyle?.color)
-    const userColorPicker = tool == 'setFontColor' ? <ColorPicker setColor={setColor}></ColorPicker> : null
+    const {setContentPagenote,tool, setTool } = AnchorContext
+    const [color,setColor]=useState(fontColor)
+    const userColorPicker = tool == 'setFontColor' ? <ColorPicker color={color} setColor={setColor}></ColorPicker> : null
     
     useEffect(() => {
         setContentPagenote(contentPagenote=>({
             ...contentPagenote,
             pagenoteStyle:{
                 ...contentPagenote.pagenoteStyle,
-                backgroundColor:color,
+                color:color,
             }
         }))
     }, [color])

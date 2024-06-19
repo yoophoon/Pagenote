@@ -82,6 +82,9 @@ export type TPagenote = {
     pagenotePosition:EPosition,
     showTools:boolean,
     showEditor:boolean,
+    showEditorTitle:boolean,
+    showEditorTools:boolean,
+    renderMarkdown:boolean,
     //pagenoteFragment在页面中的位置，如果pagenoteFragment不存在则为-1
     pagenoteIndex: number,
     pagenoteFragment?: TPagenoteFragment,
@@ -97,3 +100,18 @@ export type TMessageToEditor = {
 
 export type TContentPagenote=({pagenoteIcon?:HTMLElement,contentPagenote:TPagenote} | undefined)
 export type TSetContentPagenotes=React.Dispatch<React.SetStateAction<TContentPagenote[]>>
+
+export type TEditorStatus={
+    pagenoteID:number,
+    title:string,
+    titleID:string,
+    content:string,
+    markupContent:string,
+    contentID:string,
+    selectStart:number,
+    selectEnd:number,
+    open:boolean,
+    showTitle:boolean,
+    showTools:boolean,
+    renderMarkdown:boolean,
+}

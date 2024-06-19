@@ -1,7 +1,7 @@
 import DescriptionIcon from '@mui/icons-material/Description';
-import { Box, Button, ButtonGroup, ClickAwayListener, styled } from '@mui/material';
+import { Box, ButtonGroup, ClickAwayListener, styled } from '@mui/material';
 import { createContext, memo, useEffect, useMemo, useState } from 'react';
-import { TPagenote, TPagenoteStyle, TContentPagenote, TSetContentPagenotes } from "../../pagenoteTypes"
+import { TPagenote, TPagenoteStyle,  TSetContentPagenotes } from "../../pagenoteTypes"
 import ToolsSetFontColor from './PagenoteToolsButton/ToolsSetFontColor';
 import ToolsSetBackgroundColor from './PagenoteToolsButton/ToolsSetBackgroundColor';
 import ToolsSetFontBold from './PagenoteToolsButton/ToolsSetFontBold';
@@ -9,7 +9,6 @@ import ToolsSetFontItalic from './PagenoteToolsButton/ToolsSetFontItalic';
 import ToolsSetFontOverline from './PagenoteToolsButton/ToolsSetFontOverline';
 import ToolsSetFontStrikethrough from './PagenoteToolsButton/ToolsSetFontStrikethrough';
 import ToolsSetFontUnderline from './PagenoteToolsButton/ToolsSetFontUnderline';
-import ToolsSetCustomStyle from './PagenoteToolsButton/ToolsSetCustomStyle';
 import ToolsSetPagenote from './PagenoteToolsButton/ToolsSetPagenote';
 import ToolsDelete from './PagenoteToolsButton/ToolsDelete';
 import Editor from '../../Editor'
@@ -82,7 +81,6 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
   //检测更新pagenoteAnchor和pagenoteIcon的样式
   useEffect(() => {
     setEleStyle(pagenoteIcon as HTMLElement, pagenoteAnchors as HTMLElement[], contentPagenote.pagenoteStyle)
-    console.log(props.contentPagenote.pagenoteStyle)
   }, [contentPagenote.pagenoteStyle])
 
   //单击pagenoteIcon唤出pagenoteTools面板
@@ -104,16 +102,21 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
   }
 
   const handlerClickAway = () => {
+    console.log(props.contentPagenote,contentPagenote,'clickaway')
     //判断当前pagenote是否有效，并对相关元素和状态进行处理
     if (//检测pagenoteStyle是否存在，如果存在说明设置了pagenoteAnchor的样式
-        contentPagenote.pagenoteStyle ||
+        ( contentPagenote.pagenoteStyle &&
+          ( contentPagenote.pagenoteStyle.color||
+            contentPagenote.pagenoteStyle.backgroundColor||
+            contentPagenote.pagenoteStyle.fontWeight||
+            contentPagenote.pagenoteStyle.fontStyle))||
         //检测pagenoteContent是否与默认的pagenoteContent相同
-        contentPagenote.pagenoteContent != (contentPagenote.pagenoteFragment?.prefix??''+
-                                            contentPagenote.pagenoteFragment?.textStart??''+
-                                            contentPagenote.pagenoteFragment?.textEnd??''+
-                                            contentPagenote.pagenoteFragment?.suffix??'') ||
+        contentPagenote.pagenoteContent != ((contentPagenote.pagenoteFragment?.prefix??'')+
+                                            (contentPagenote.pagenoteFragment?.textStart??'')+
+                                            (contentPagenote.pagenoteFragment?.textEnd??'')+
+                                            (contentPagenote.pagenoteFragment?.suffix??'')) ||
         //检测pagenoteTitle是否与默认的pagenoteTitle相同
-        contentPagenote.pagenoteTitle != contentPagenote.pagenoteTitle
+        contentPagenote.pagenoteTitle != props.contentPagenote.pagenoteTitle
     ) {
       //符合上述条件的pagenoteContent会被认为是一个有效的pagenote
       setTool('')
@@ -162,15 +165,17 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
                     top: rectInfo.height,
                     height: rectInfo.height,
                     display: 'inline-flex',
+                    zIndex:999,
+                    overflow:'visible',
                   }}
                 >
-                  <ToolsSetFontColor />
-                  <ToolsSetBackgroundColor />
+                  <ToolsSetFontColor fontColor={contentPagenote.pagenoteStyle?.color}/>
+                  <ToolsSetBackgroundColor backgroundColor={contentPagenote.pagenoteStyle?.backgroundColor}/>
                   <ToolsSetFontBold />
                   <ToolsSetFontItalic />
-                  <ToolsSetFontOverline />
-                  <ToolsSetFontStrikethrough />
-                  <ToolsSetFontUnderline />
+                  <ToolsSetFontOverline overline={contentPagenote.pagenoteStyle?.textDecoration??''}/>
+                  <ToolsSetFontStrikethrough strikethrough={contentPagenote.pagenoteStyle?.textDecoration??''}/>
+                  <ToolsSetFontUnderline underline={contentPagenote.pagenoteStyle?.textDecoration??''}/>
                   {/* <ToolsSetCustomStyle /> */}
                   <ToolsSetPagenote />
                   <ToolsDelete />

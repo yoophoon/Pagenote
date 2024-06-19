@@ -3,33 +3,33 @@ import React, { useContext, useEffect, useState } from "react";
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 import FormatOverlineIcon from '@mui/icons-material/FormatOverline';
 
-export default function ToolsSetFontOverline() {
+type overline={
+    overline:string
+  }
+
+export default function ToolsSetFontOverline({overline}:overline) {
     const AnchorContext = useContext(PagenoteAnchorContext)
     if (AnchorContext == null) {
         return <></>
     }
+    console.log(overline)
+    const { setContentPagenote, setTool } = AnchorContext
 
-    const { contentPagenote, setContentPagenote, setTool } = AnchorContext
-    const [fontOverline,setFontOverline]=useState(contentPagenote.pagenoteStyle?.textDecoration)
-
-    
-    useEffect(() => {
-        setContentPagenote(contentPagenote=>({
-            ...contentPagenote,
-                pagenoteStyle: {
-                    ...contentPagenote.pagenoteStyle,
-                    textDecoration: fontOverline,
-                }
-            })
-        )
-    }, [fontOverline])
-    console.log('overline++++++++',fontOverline,contentPagenote.pagenoteID)
     const handlerFontOverlineClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
         setTool('setFontOverline')
-        setFontOverline(fontOverline?.includes('overline')?fontOverline?.replace(/overline/g,'').replace(/[ ]+/g,' ').trim():(fontOverline??'')+' overline')
+        setContentPagenote(contentPagenote=>({
+            ...contentPagenote,
+                pagenoteStyle: {
+                    ...contentPagenote.pagenoteStyle,
+                    textDecoration: overline.includes('overline')?
+                                    overline.replace(/overline/g,'').replace(/[ ]+/g,' ').trim():
+                                    (overline+' overline'),
+                }
+            })
+        )
     }
 
     return (

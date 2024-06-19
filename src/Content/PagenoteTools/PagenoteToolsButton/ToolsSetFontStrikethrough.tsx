@@ -3,33 +3,33 @@ import React, { useContext, useEffect, useState } from "react";
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 import StrikethroughSIcon from '@mui/icons-material/StrikethroughS';
 
-export default function ToolsSetFontStrikethrough() {
+type strikethrough={
+    strikethrough:string
+  }
+
+export default function ToolsSetFontStrikethrough({strikethrough}:strikethrough) {
     const AnchorContext = useContext(PagenoteAnchorContext)
     if (AnchorContext == null) {
         return <></>
     }
 
-    const { contentPagenote,setContentPagenote, setTool } = AnchorContext
-    const [fontStrikethrough,setFontStrikethrough]=useState(contentPagenote.pagenoteStyle?.fontStyle)
-
-    
-    useEffect(() => {
-        setContentPagenote(contentPagenote=>({
-            ...contentPagenote,
-                pagenoteStyle: {
-                    ...contentPagenote.pagenoteStyle,
-                    textDecoration: fontStrikethrough,
-                }
-            })
-        )
-    }, [fontStrikethrough])
+    const { setContentPagenote, setTool } = AnchorContext
 
     const handlerFontStrikethroughClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
         setTool('setFontStrikethrough')
-        setFontStrikethrough(fontStrikethrough?.includes('line-through')?fontStrikethrough.replace(/line-through/g,'').replace(/[ ]+/g,' ').trim():(fontStrikethrough??'')+' line-through')
+        setContentPagenote(contentPagenote=>({
+            ...contentPagenote,
+                pagenoteStyle: {
+                    ...contentPagenote.pagenoteStyle,
+                    textDecoration: strikethrough.includes('line-through')?
+                                    strikethrough.replace(/line-through/g,'').replace(/[ ]+/g,' ').trim():
+                                    (strikethrough+' line-through'),
+                }
+            })
+        )
     }
 
     return (

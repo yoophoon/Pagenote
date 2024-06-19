@@ -4,17 +4,20 @@ import React, { useContext, useEffect, useState } from "react";
 import { ColorPicker } from "../../../Components/ColorPicker";
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 
+type backgroundColor={
+  backgroundColor:string|undefined
+}
 /**
  * 这个组件用于设置pagenoteAnchors的背景颜色
  * @returns 一个设置pagenoteAnchor背景颜色的按钮，单击调出colorPicker
  */
-export default function ToolsSetBackgroundColor() {
+export default function ToolsSetBackgroundColor({backgroundColor}:backgroundColor) {
   const AnchorContext = useContext(PagenoteAnchorContext)
   if (AnchorContext == null) return
 
-  const { contentPagenote, setContentPagenote, tool, setTool } = AnchorContext
-  const [color, setColor] = useState(contentPagenote.pagenoteStyle?.backgroundColor)
-  const userColorPicker = tool == 'setBackgroundColor' ? <ColorPicker setColor={setColor}></ColorPicker> : null
+  const { setContentPagenote, tool, setTool } = AnchorContext
+  const [color, setColor] = useState(backgroundColor)
+  const userColorPicker = tool == 'setBackgroundColor' ? <ColorPicker color={color} setColor={setColor}></ColorPicker> : null
 
   useEffect(() => {
     setContentPagenote(contentPagenote=>({

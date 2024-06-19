@@ -24,36 +24,19 @@ export default function ContentPagenotes()
     },[])
     console.log(pagenotesInfo)
     return (<>
-        {pagenotesInfo.map((pagenoteInfo,index) => {
-            console.log(pagenoteInfo &&
-                pagenoteInfo.pagenoteIcon == undefined &&
-                pagenoteInfo.contentPagenote.showEditor)
-            const contentPagenote=pagenotesInfo[index]
-            if (!contentPagenote) return
-            else
-                console.log('contentpagenote',
-                    pagenoteInfo &&
-                    pagenoteInfo.pagenoteIcon &&
-                    createPortal(
+        {pagenotesInfo.map((pagenoteInfo) => {
+            return (
+                pagenoteInfo &&
+                pagenoteInfo.pagenoteIcon &&
+                createPortal(
                     <PagenoteIcon
                         key={pagenoteInfo.contentPagenote.pagenoteID}
-                        contentPagenote={contentPagenote.contentPagenote}
+                        contentPagenote={pagenoteInfo.contentPagenote}
                         setAllPagenotesInfo={setPagenotesInfo}
                     />,
                     pagenoteInfo.pagenoteIcon, pagenoteInfo.contentPagenote.pagenoteID.toString()
-                ))
-                return (
-                    pagenoteInfo &&
-                    pagenoteInfo.pagenoteIcon &&
-                    createPortal(
-                        <PagenoteIcon
-                            key={pagenoteInfo.contentPagenote.pagenoteID}
-                            contentPagenote={contentPagenote.contentPagenote}
-                            setAllPagenotesInfo={setPagenotesInfo}
-                        />,
-                        pagenoteInfo.pagenoteIcon, pagenoteInfo.contentPagenote.pagenoteID.toString()
-                    )
                 )
+            )
         })}
     </>)
 }

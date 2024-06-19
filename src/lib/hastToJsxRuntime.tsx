@@ -736,20 +736,20 @@ function createElementProps(state, node) {
     }
 
     //自定义的属性
-    if (node['position']) {
-        //@ts-ignore
-        props['pagenoteMarkdownPosition'] = JSON.stringify({
-            markdownstartline: node['position']['start']['line'],
-            markdownstartcolumm: node['position']['start']['column'],
-            markdownendline: node['position']['end']['line'],
-            markdownendcolumm: node['position']['end']['column']
-        })
-    }
+    // if (node['position']) {
+    //     //@ts-ignore
+    //     props['pagenoteMarkdownPosition'] = JSON.stringify({
+    //         markdownstartline: node['position']['start']['line'],
+    //         markdownstartcolumm: node['position']['start']['column'],
+    //         markdownendline: node['position']['end']['line'],
+    //         markdownendcolumm: node['position']['end']['column']
+    //     })
+    // }
 
-    //@ts-ignore
-    props['contentEditable'] = "plaintext-only"
-    //@ts-ignore
-    props['tabIndex'] = '0'
+    // //@ts-ignore
+    // props['contentEditable'] = "plaintext-only"
+    // //@ts-ignore
+    // props['tabIndex'] = '0'
     return props
 }
 
@@ -817,20 +817,20 @@ function createJsxElementProps(state, node) {
 
 
     //自定义的属性
-    if (node['position']) {
-        //@ts-ignore
-        props['pagenoteMarkdownPosition'] = JSON.stringify({
-            markdownstartline: node['position']['start']['line'],
-            markdownstartcolumm: node['position']['start']['column'],
-            markdownendline: node['position']['end']['line'],
-            markdownendcolumm: node['position']['end']['column']
-        })
-    }
+    // if (node['position']) {
+    //     //@ts-ignore
+    //     props['pagenoteMarkdownPosition'] = JSON.stringify({
+    //         markdownstartline: node['position']['start']['line'],
+    //         markdownstartcolumm: node['position']['start']['column'],
+    //         markdownendline: node['position']['end']['line'],
+    //         markdownendcolumm: node['position']['end']['column']
+    //     })
+    // }
 
-    //@ts-ignore
-    props['contentEditable'] = "plaintext-only"
-    //@ts-ignore
-    props['tabIndex'] = '0'
+    // //@ts-ignore
+    // props['contentEditable'] = "plaintext-only"
+    // //@ts-ignore
+    // props['tabIndex'] = '0'
     return props
 }
 

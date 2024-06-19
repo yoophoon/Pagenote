@@ -5,13 +5,44 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ColorizeIcon from '@mui/icons-material/Colorize';
 import { PickerCanvas } from './PickerCanvas';
 
+function getRGBA(rgbaStr:string|undefined){
+  let rgbaValue={
+    strR:0,
+    strG:0,
+    strB:0,
+    strA:1,
+  }
+  if(rgbaStr==undefined||rgbaStr==''){
+    return rgbaValue
+  }
+  const RGBA=rgbaStr.split('(')
+  const rgbaArr=RGBA[1].split(')')[0].split(',')
+  if(RGBA[0]=='rgb'){
+    rgbaValue={
+      strR:parseInt(rgbaArr[0].trim()),
+      strG:parseInt(rgbaArr[1].trim()),
+      strB:parseInt(rgbaArr[2].trim()),
+      strA:1,
+    }
+  }else if(RGBA[0]=='rgba'){
+    rgbaValue={
+      strR:parseInt(rgbaArr[0].trim()),
+      strG:parseInt(rgbaArr[1].trim()),
+      strB:parseInt(rgbaArr[2].trim()),
+      strA:parseInt(rgbaArr[3].trim()),
+    }
+  }
+  return rgbaValue
+}
+
 export const ColorPicker = forwardRef((props: any,ref:any) => {
-  const { setColor } = props
-  const [opacity, setOpacity] = useState(255)
+  const {color ,setColor } = props
+  const { strR, strG, strB, strA } = getRGBA(color)
+  const [opacity, setOpacity] = useState(strA*255)
   const [sliderRGB, setSliderRGB] = useState({
-    r: 0,
-    g: 156,
-    b: 255,
+    r: strR,
+    g: strG,
+    b: strB,
   })
 
   const PickerCanvasRef = useRef({ setCanvasRGB: (t: { r: number, g: number, b: number }) => { } })

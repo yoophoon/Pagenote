@@ -78,6 +78,9 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
         pagenoteTarget: window.location.origin + window.location.pathname,
         showTools: false,
         showEditor: false,
+        showEditorTitle:true,
+        showEditorTools:true,
+        renderMarkdown:false,
     }
 
     return { pagenoteEles, contentPagenote }

@@ -4,33 +4,33 @@ import { PagenoteAnchorContext } from '../PagenoteIcon'
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import { EOperation } from "../../../pagenoteTypes";
 
-export default function ToolsSetFontUnderline() {
+type underline={
+    underline:string
+  }
+
+export default function ToolsSetFontUnderline({underline}:underline) {
     const AnchorContext = useContext(PagenoteAnchorContext)
     if (AnchorContext == null) {
         return <></>
     }
 
-    const { contentPagenote,setContentPagenote, setTool } = AnchorContext
-    const [fontUnderline,setFontUnderline]=useState(contentPagenote.pagenoteStyle?.fontStyle)
-
-    
-    useEffect(() => {
-        setContentPagenote(contentPagenote=>({
-            ...contentPagenote,
-                pagenoteStyle: {
-                    ...contentPagenote.pagenoteStyle,
-                    textDecoration: fontUnderline,
-                }
-            })
-        )
-    }, [fontUnderline])
+    const {setContentPagenote, setTool } = AnchorContext
 
     const handlerFontUnderlineClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         window.getSelection()?.removeAllRanges()
         setTool('setFontUnderline')
-        setFontUnderline(fontUnderline?.includes('underline')?fontUnderline.replace(/underline/g,'').replace(/[ ]+/g,' ').trim():(fontUnderline??'')+' underline')
+        setContentPagenote(contentPagenote=>({
+            ...contentPagenote,
+                pagenoteStyle: {
+                    ...contentPagenote.pagenoteStyle,
+                    textDecoration: underline.includes('underline')?
+                                    underline.replace(/underline/g,'').replace(/[ ]+/g,' ').trim():
+                                    (underline+' underline'),
+                }
+            })
+        )
 
         chrome.runtime.sendMessage({operation:EOperation.sidePanel,value:"fuck sidepanel"},response=>{
             console.log(response)

@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 
+
 export default function ToolsSetFontBold() {
     const AnchorContext = useContext(PagenoteAnchorContext)
     if (AnchorContext == null) {

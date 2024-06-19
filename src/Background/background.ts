@@ -2,6 +2,7 @@ import { common, createStarryNight } from '@wooorm/starry-night'
 import { toHtml } from 'hast-util-to-html'
 import { EOperation, ERenderTarget } from '../pagenoteTypes'
 import { nodesInline } from './lib'
+import markupRender, { getStaticMarkUp } from './MarkdownRender'
 // import markupRender from './MarkdownRender'
 
 
@@ -89,7 +90,15 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
                 sendResponse({ renderedContent: renderedContentHTML })
             })
             return true
-
+        }else if(message.value&&message.value.target==ERenderTarget.markup&&message.value.content!=''){
+            console.log(message)
+            // console.log(getStaticMarkUp(message.value.content))
+            //console.log(markupRender(message.value.content))
+            //.then(result=>{
+            //     console.log('markup',result)
+            //     sendResponse({ renderedContent: result })
+            // })
+            // return true
         }
         // console.log(renderedNode)
     } else if (operation == EOperation.savePagenote) {
@@ -169,6 +178,10 @@ chrome.runtime.onConnect.addListener(function (port) {
                     content: message.value.content,
                     renderedContent: renderedContentHTML,
                 });
+                console.log({
+                    content: message.value.content,
+                    renderedContent: renderedContentHTML,
+                })
             })
         }
     });

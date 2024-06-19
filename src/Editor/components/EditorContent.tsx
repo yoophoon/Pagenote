@@ -2,7 +2,13 @@ import { Paper, styled } from "@mui/material";
 import { Root } from 'hast'
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime'
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState, useTransition } from 'react'
+import { EditorContext } from "..";
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
 
 //// @ts-expect-error: untyped.
 
@@ -16,6 +22,7 @@ import { useContext, useEffect, useState } from 'react'
 // import remarkToc from 'remark-toc'
 import { EOperation, ERenderTarget } from '../../pagenoteTypes'
 import '@wooorm/starry-night/style/both'
+import MarkupRender from "../../Background/MarkdownRender";
 
 const MarkdownPresentation = styled('div')(({ theme }) => ({
     ...theme.typography.body2,
@@ -23,18 +30,31 @@ const MarkdownPresentation = styled('div')(({ theme }) => ({
     inset: 0,
     width: 700,
     height: 'fit-content',
+    margin:0,
+    marginTop:5,
     minHeight: 700,
-    lineHeight: 1,
+    lineHeight: 1.3,
     fontSize: theme.typography.fontSize,
     overflow: 'hidden',
-    '& *': {
-        ...theme.typography.body2,
+    counterReset: 'lineRow',
+    // '& *': {
+    //     ...theme.typography.body2,
+    // },
+    '& *':{
+        fontWeight:'normal !important',
+        fontSize:16,
+        lineHeight:1.3,
+        whiteSpace:'break-spaces',
+        fontFamily:'"Roboto","Helvetica","Arial",sans-serif',
     },
-    '& > p': {
+    '& > *': {
         position: 'relative',
+        margin:'0 !important',
         paddingLeft: 25,
     },
     '& > *::before': {
+        counterIncrement: 'lineRow',
+        content:'counter(lineRow)',
         paddingRight: 3,
         position: 'absolute',
         left: 0,
@@ -52,24 +72,28 @@ const MarkdownPresentation = styled('div')(({ theme }) => ({
 const UserTextArea = styled('textarea')(({ theme }) => ({
     ...theme.typography.body2,
     textAlign: 'left',
-    color: "#00000000",
+    // color: "#00000000",
     width: 700,
     height: 'fit-content',
     position: 'absolute',
     inset: 0,
     minHeight: 700,
-    lineHeight: 1,
+    lineHeight: 1.3,
+    margin:0,
+    marginTop:5,
     resize: 'none',
-    backgroundColor: '#00000000',
-    fontSize: theme.typography.fontSize,
+    // backgroundColor: '#00000000',
+    fontFamily:'"Roboto","Helvetica","Arial",sans-serif',
+    fontSize:16,
+    fontWeight:'normal',
     padding: 0,
     paddingLeft: 25,
     border: 'none',
-    outline: `1px solid ${theme.palette.text.disabled}`,
+    outline: 'none',
     outlineOffset: 2,
     overflow: 'hidden',
     caretColor: theme.palette.text.primary,
-    whiteSpace: 'pre-wrap',
+    whiteSpace:'break-spaces',
 }));
 
 const EditorContentContainer = styled(Paper)(({ theme }) => ({
@@ -80,65 +104,164 @@ const EditorContentContainer = styled(Paper)(({ theme }) => ({
     overflow: 'auto',
 }))
 
+
 // react无法接管页面编辑的元素，采用其他函数操作编辑元素的hast
 // { children }: { children: React.ReactNode }
 export default function EditorContent() {
-
-
+    //获取初始值
+    const editorContext = useContext(EditorContext)
+    if(editorContext==null) return
+    const {editorStatus, setEditorStatus}=editorContext
+    // const [isPending,startTransition]=useTransition()
     const [vfile, setVfile] = useState({
-        content: '',
-        renderedContent: ''
+        content: editorContext.editorStatus.content,
+        renderedContent: '',
+        color:'#00000000',
+        'background-color':'#00000000',
+        selectionStart:0,
+        selectionEnd:0,
+        renderPort:chrome.runtime.connect({ name: 'renderport' }),
     })
-    const [renderPort, setRenderPort] = useState<chrome.runtime.Port>()
+    // const [renderPort, setRenderPort] = useState<chrome.runtime.Port>()
 
-    const handlerSelect=(e:React.SyntheticEvent<HTMLTextAreaElement, Event>)=>{
-        console.log('select event',e)
+    //在select事件中修改editorstatus的selectStart和selectEnd，方便其他组件获取数据
+    // const handlerSelect=(e:React.SyntheticEvent<HTMLTextAreaElement, Event>)=>{
+    //     const target=e.target as typeof e.currentTarget
+    //     if(target.selectionDirection=='forward'){
+    //         setEditorStatus(editorStatus=>({
+    //             ...editorStatus,
+    //             selectStart:target.selectionStart,
+    //             selectEnd:target.selectionEnd,
+    //         }))
+    //     } else if(target.selectionDirection=='backward'){
+    //         setEditorStatus(editorStatus=>({
+    //             ...editorStatus,
+    //             selectStart:target.selectionEnd,
+    //             selectEnd:target.selectionStart,
+    //         }))
+    //     }       
+    // }
+
+    const handlerFocus=(e:React.FocusEvent<HTMLTextAreaElement, Element>)=>{
+        console.log('focus e',e)
+        setVfile(vfile=>({
+            ...vfile,
+            color:'',
+            "background-color":'',
+        }))
     }
 
+    const handlerBlur=(e:React.FocusEvent<HTMLTextAreaElement, Element>)=>{
+        //如果textarea的内容发生变动则在textarea失去焦点是对其内容进行渲染
+        // if(vfile.content!=e.target.value){
+            vfile.renderPort.postMessage({
+                operation: EOperation.render,
+                value: {
+                    target: ERenderTarget.hightlight,
+                    content: e.target.value
+                }
+            })
+        // }
+        //更新editorStatus，需要更新selection的位置以供其他组件使用
+        if( vfile.selectionEnd!=e.target.selectionEnd||
+            vfile.selectionStart!=e.target.selectionStart||
+            editorStatus.content!=e.target.value){
+            setEditorStatus(editorStatus=>({
+                ...editorStatus,
+                selectStart:e.target.selectionStart,
+                selectEnd:e.target.selectionEnd,
+                content:e.target.value,
+            }))
+        }
+        //更新textarea的状态 颜色及背景色
+        setVfile(vfile=>({
+            ...vfile,
+            content:e.target.value,
+            color:'#00000000',
+            "background-color":'#00000000',
+            selectionEnd:e.target.selectionEnd,
+            selectionStart:e.target.selectionStart,
+        }))
+        console.log('blur e',e)
+    }
+
+    useEffect(()=>{
+        console.log(editorStatus)
+        vfile.renderPort.postMessage({
+            operation: EOperation.render,
+            value: {
+                target: ERenderTarget.hightlight,
+                content: editorStatus.content
+                //.replace(/[ ]+/,' ').replace(/[ ]?\n[ ]?/,'\n').trimStart(),
+            }
+        })
+    },[editorStatus.content])
+
     useEffect(() => {
-        const renderPort = chrome.runtime.connect({ name: 'renderport' })
-        setRenderPort(renderPort)
-        console.log('init')
-        renderPort.onMessage.addListener((response) => {
+        if(!vfile.renderPort){
+            setVfile(vfile=>({
+                ...vfile,
+                renderPort:chrome.runtime.connect({ name: 'renderport' })
+            }))
+        }
+        //打开editor时将默认的content渲染一次
+        vfile.renderPort.postMessage({
+            operation: EOperation.render,
+            value: {
+                target: ERenderTarget.hightlight,
+                content: vfile.content
+                //.replace(/[ ]+/,' ').replace(/[ ]?\n[ ]?/,'\n').trimStart(),
+            }
+        })
+
+        vfile.renderPort.onMessage.addListener((response) => {
             if (!response) {
                 console.log('something is wrong')
                 return
             }
             console.log(response)
-            setVfile({
+            setVfile(vfile=>({
+                ...vfile,
                 content: response.content,
                 renderedContent: response.renderedContent,
-            })
+            }))
         })
+        return ()=>{
+            vfile.renderPort.disconnect()
+        }
     }, [])
 
     return (<EditorContentContainer>
-        <MarkdownPresentation className="draw"
-            id="pagenoteEditorContent"
-            dangerouslySetInnerHTML={{ __html: vfile.renderedContent }}
-        >
-        </MarkdownPresentation>
+        {!editorStatus.renderMarkdown?
+            <MarkdownPresentation className="draw"
+                id="pagenoteEditorContent"
+                dangerouslySetInnerHTML={{ __html: vfile.renderedContent }} /> :
+            <MarkdownPresentation className="draw" id="pagenoteEditorContent"                >
+                <MarkupRender markdown={editorStatus.content}></MarkupRender>
+            </MarkdownPresentation>
+        }
         <UserTextArea
-            id="pagenoteEditorInput"
+            id={editorStatus.contentID}
             spellCheck="false"
             className="write"
+            // rows={vfile.content.split('\n').length + 1}
+            // value={editorStatus.content}
             value={vfile.content}
-            rows={vfile.content.split('\n').length + 1}
-            onSelect={e=>handlerSelect(e)}
+            style={{
+                color:vfile.color,
+                backgroundColor:vfile["background-color"],
+                display:editorStatus.renderMarkdown?"none":"block"
+            }}
+            // onSelect={e=>handlerSelect(e)}
+            onFocus={handlerFocus}
+            onBlur={handlerBlur}
             onChange={function (event) {
-                console.log(event)
-                console.log(vfile)
-                if (renderPort) {
-                    renderPort.postMessage({
-                        operation: EOperation.render,
-                        value: {
-                            target: ERenderTarget.hightlight,
-                            content: event.target.value,
-                        }
-                    })
-                }
-            }} />
-        
+                    setVfile(vfile=>({
+                        ...vfile,
+                        content:event.target.value,
+                    }))
+            }} 
+            />
     </EditorContentContainer>)
 }
 
