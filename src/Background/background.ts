@@ -1,7 +1,8 @@
 import { common, createStarryNight } from '@wooorm/starry-night'
 import { toHtml } from 'hast-util-to-html'
-import { EOperation, ERenderTarget } from '../pagenoteTypes'
+import { EOperation, ERenderTarget, TPagenote } from '../pagenoteTypes'
 import { nodesInline } from './lib'
+import pagenoteDB from './storeage/pagenoteDB'
 import markupRender, { getStaticMarkUp } from './MarkdownRender'
 // import markupRender from './MarkdownRender'
 
@@ -50,6 +51,12 @@ import markupRender, { getStaticMarkUp } from './MarkdownRender'
 // const views=chrome.extension.getViews();
 // console.log('views',views)
 
+
+pagenoteDB.open().catch(function (e) {
+    console.error("Open siteConfigDB failed: " + e.stack);
+})
+
+
 const pnChannel=new BroadcastChannel('pagenoteChannel')
 pnChannel.onmessage=e=>{
     console.log(e)
@@ -67,18 +74,18 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
     if (operation == EOperation.openNotesInSidepanel) {
         //background无法使用window对象，这里通过message获取其他区域脚本传过来的origin
         //方便作为sidepanel的地址
-        let SidepanelPath = extensionURL + 'sidepanel.html'
-        chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-            console.log(tab)
-            if (tab.id && sender) {
-                //sidePanel.open有bug，链接给了一些解决方案
-                //https://stackoverflow.com/questions/77213045/error-sidepanel-open-may-only-be-called-in-response-to-a-user-gesture-re
-                chrome.sidePanel.open({ tabId: tab.id });
-                SidepanelPath += '?currentTabURL=' + tab.url
-                chrome.sidePanel.setOptions({ path: SidepanelPath, enabled: true });
-                sendResponse({})
-            }
-        })
+        // let SidepanelPath = extensionURL + 'sidepanel.html'
+        // chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+        //     console.log(tab)
+        //     if (tab.id && sender) {
+        //         //sidePanel.open有bug，链接给了一些解决方案
+        //         //https://stackoverflow.com/questions/77213045/error-sidepanel-open-may-only-be-called-in-response-to-a-user-gesture-re
+        //         chrome.sidePanel.open({ tabId: tab.id });
+        //         SidepanelPath += '?currentTabURL=' + tab.url
+        //         chrome.sidePanel.setOptions({ path: SidepanelPath, enabled: true });
+        //         sendResponse({})
+        //     }
+        // })
     } else if (operation == EOperation.openEditor) {
 
     } else if (operation == EOperation.render) {
@@ -101,19 +108,13 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
             // return true
         }
         // console.log(renderedNode)
-    } else if (operation == EOperation.savePagenote) {
+    }  else if(operation=='imgfile'){
         console.log(message)
-    } else if (operation == EOperation.getPagenotes) {
-        console.log(message.value.origin)
-        sendResponse({ pagenotes: ['pagenotes'] })
-        return true
-    } else if(operation=='imgfile'){
-        console.log(message)
-        // await chrome.offscreen.createDocument({
-        //     url:`offScreenHTML.html`,
-        //     reasons:[chrome.offscreen.Reason.BLOBS],
-        //     justification:"generate objectURL"
-        // })
+        await chrome.offscreen.createDocument({
+            url:`offScreenHTML.html`,
+            reasons:[chrome.offscreen.Reason.BLOBS],
+            justification:"generate objectURL"
+        })
         
         chrome.runtime.sendMessage({
             operation: 'generateObjectURL',
@@ -123,7 +124,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
             sendResponse(response)
         })
         return true
-    }
+    } 
 
 
     // if (message.type === 'open_side_panel' && activeTab.id) {
@@ -134,6 +135,66 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
 })
 
+
+chrome.runtime.onMessage.addListener(function (message,sender,sendResponse){
+    const { operation } = message
+    if (operation == EOperation.savePagenote) {
+        const contentPagenote:TPagenote=message.value
+        console.log('store pagenote',message)
+        pagenoteDB.transaction('rw', pagenoteDB.pagenote, ()=>{
+            pagenoteDB.pagenote.put(contentPagenote,contentPagenote.pagenoteID)
+        }).catch(function (e) {
+            console.error(e);
+        })
+    }  else if(operation==EOperation.deletePagenote){
+        pagenoteDB.pagenote.delete(message.value.pagenoteID)
+    } else if (operation == EOperation.getPagenotes) {
+        console.log(message.value.origin)
+        pagenoteDB.pagenote
+        //get获取第一个匹配的值
+        //.get({'pagenoteTarget':message.value.origin})
+        
+        .where({'pagenoteTarget':message.value.origin})
+        //where语句本质也是filter，上面where语句和下面的filter语句等价
+        // filter(pagenote=>{
+        //     return pagenote.pagenoteTarget==message.value.origin
+        // })
+        .toArray().then(res=>{
+            console.log('message...',message,'pagenote...',res)
+            sendResponse(res)
+        })
+        return true
+    }
+})
+
+/**
+ * 保存和获取网页设置 如主题、侧栏位置、笔记显示的设置
+ */
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+    const { operation } = message
+    if(operation==EOperation.siteConfig){
+        console.log(message)
+        pagenoteDB.transaction('rw', pagenoteDB.sitesConfig, ()=>{
+            pagenoteDB.sitesConfig.put(message.value,message.value.origin)
+        }).catch(function (e) {
+            console.error(e);
+        })
+    } else if(operation==EOperation.getSiteConfig){
+            pagenoteDB.sitesConfig.get(message.value.origin).then(res=>{
+                console.log('message...',message,'siteConfig...',res)
+                sendResponse(res)
+            })
+            
+           
+            // .then(res=>{
+            //     console.log(message,res)
+            //     // sendResponse(JSON.stringify(res))
+            //     sendResponse({siteConfig:'fuck u'})
+            // })
+            // sendResponse({siteConfig:'fuck u'})
+            return true
+    }
+})
 
 
 let creating:Promise<void>|null; // A global promise to avoid concurrency issues
@@ -188,52 +249,52 @@ chrome.runtime.onConnect.addListener(function (port) {
 })
 
 
-import Dexie, { type EntityTable } from 'dexie'
+// import Dexie, { type EntityTable } from 'dexie'
 
-interface user {
-    id:number;
-    name:string;
-    username:string;
-    email:string[],
-    address:{
-        city:string,
-        country:string,
-    }
+// interface user {
+//     id:number;
+//     name:string;
+//     username:string;
+//     email:string[],
+//     address:{
+//         city:string,
+//         country:string,
+//     }
     
-}
+// }
 
-var db = new Dexie("FriendsAndPetsDatabase") as Dexie & {
-    users:EntityTable<
-    user,
-    'id'
-    >
-};
-db.version(1).stores({
-    users: "++id, name, &username, *email, address.city",
-    relations: "++, userId1, userId2, [userId1+userId2], relation",
-});
-db.open().catch(function (e) {
-    console.error("Open failed: " + e.stack);
-})
-db.transaction('rw', db.users, function () {
-    db.users.add({
-            name: "Zlatan",
-            username: "ibra",
-            email: ["zlatan@ibrahimovic.se", "zlatan.ibrahimovic@gmail.com"],
-            address: {
-                city: "Malmö",
-                country: "Sweden"
-            }
-        });
-    db.users.where("email")
-        .startsWith("zlatan")
-        .or("address.city")
-        .anyOf(["Malmö", "Stockholm", "Barcelona"])
-        .each(function (user) {
-            console.log("Found user: " + user.name);
-        });
-}).catch(function (e) {
-    console.error(e);
-})
+// var db = new Dexie("FriendsAndPetsDatabase") as Dexie & {
+//     users:EntityTable<
+//     user,
+//     'id'
+//     >
+// };
+// db.version(1).stores({
+//     users: "++id, name, &username, *email, address.city",
+//     relations: "++, userId1, userId2, [userId1+userId2], relation",
+// });
+// db.open().catch(function (e) {
+//     console.error("Open failed: " + e.stack);
+// })
+// db.transaction('rw', db.users, function () {
+//     db.users.add({
+//             name: "Zlatan",
+//             username: "ibra",
+//             email: ["zlatan@ibrahimovic.se", "zlatan.ibrahimovic@gmail.com"],
+//             address: {
+//                 city: "Malmö",
+//                 country: "Sweden"
+//             }
+//         });
+//     db.users.where("email")
+//         .startsWith("zlatan")
+//         .or("address.city")
+//         .anyOf(["Malmö", "Stockholm", "Barcelona"])
+//         .each(function (user) {
+//             console.log("Found user: " + user.name);
+//         });
+// }).catch(function (e) {
+//     console.error(e);
+// })
 
 

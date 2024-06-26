@@ -1,6 +1,7 @@
-import { Typography } from "@mui/material"
+import { Typography, useTheme } from "@mui/material"
 import { useContext } from "react"
 import {EditorContext} from '..'
+
 /**
  * 用户可以双击修改标题，双击选中之后的outline不再清除
  * @returns 
@@ -11,6 +12,7 @@ export default function EditorTitle() {
     const editorContext=useContext(EditorContext)
     if (editorContext == null) { return }
     const {editorStatus}=editorContext
+    const theme=useTheme()
     //处理双击事件，如果用户对title元素进行双击，先将元素的contenteditable设置为plaintext-only
     //然后选中title的全部文字等待用户修改，代替之前的浏览器弹窗修改标题，这样更符合用户使用习惯
     const handlerDoubleClick = (e:React.MouseEvent) => {        
@@ -51,8 +53,11 @@ export default function EditorTitle() {
         sx={{
             background:'none',
             width:'100%',
-            height:'unset',
-            float:'none'
+            height:theme.pagenote.pagenoteEditor.title.height,
+            float:'none',
+            textOverflow:'ellipsis',
+            overflow:'hidden',
+            whiteSpace:'nowrap',
         }}
     >
         {editorStatus.title}

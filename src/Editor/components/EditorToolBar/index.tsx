@@ -1,12 +1,17 @@
-import { ButtonGroup, IconButton, SvgIcon, Tooltip, Zoom } from '@mui/material'
+import { ButtonGroup, IconButton, SvgIcon, Tooltip, Zoom, useTheme } from '@mui/material'
 import SetTable from '../../../assets/svg/Table'
 import { FormatListNumbered } from '@mui/icons-material'
 // import EditorSaveContent from './EditorSaveContent'
 import EditorMarkup from './EditorRenderMarkup'
 import EditorClose from './EditorClose'
 export default function EditorToolBar() {
+    const theme=useTheme()
     return (
-        <ButtonGroup>
+        <ButtonGroup sx={{
+            height:theme.pagenote.pagenoteEditor.tools.height,
+            width:'100%',
+            overflow:'hidden',
+        }}>
             <EditorSetHead />
             <EditorToolSplit />
             <EditorSetBold />

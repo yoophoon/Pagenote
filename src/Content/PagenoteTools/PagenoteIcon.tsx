@@ -1,7 +1,7 @@
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Box, ButtonGroup, ClickAwayListener, styled } from '@mui/material';
-import { createContext, memo, useEffect, useMemo, useState } from 'react';
-import { TPagenote, TPagenoteStyle,  TSetContentPagenotes } from "../../pagenoteTypes"
+import { Fragment, createContext, memo, useEffect, useMemo, useState } from 'react';
+import { EOperation, EPosition, TPagenote, TPagenoteStyle,  TSetContentPagenotes } from "../../pagenoteTypes"
 import ToolsSetFontColor from './PagenoteToolsButton/ToolsSetFontColor';
 import ToolsSetBackgroundColor from './PagenoteToolsButton/ToolsSetBackgroundColor';
 import ToolsSetFontBold from './PagenoteToolsButton/ToolsSetFontBold';
@@ -12,10 +12,11 @@ import ToolsSetFontUnderline from './PagenoteToolsButton/ToolsSetFontUnderline';
 import ToolsSetPagenote from './PagenoteToolsButton/ToolsSetPagenote';
 import ToolsDelete from './PagenoteToolsButton/ToolsDelete';
 import Editor from '../../Editor'
+import { createPortal } from 'react-dom';
 
 type TPagenoteIcon = {
-    contentPagenote: TPagenote,
-    setAllPagenotesInfo: TSetContentPagenotes
+  contentPagenote: TPagenote,
+  setAllPagenotesInfo: TSetContentPagenotes
 }
 
 const ToolsButtonGroup = styled(ButtonGroup)(({ theme }) => ({
@@ -52,17 +53,56 @@ type TPagenoteAnchorContext = {
 export const PagenoteAnchorContext = createContext<TPagenoteAnchorContext | null>(null)
 
 const PagenoteIcon = memo((props: TPagenoteIcon) => {
+
+  //组件状态设置
+  //--------------------------------------------------------------------------
+  //
+  const [contentPagenote, setContentPagenote] = useState(props.contentPagenote)
+  const [tool, setTool] = useState<TTool>('')
+
   //获取pagenoteAnchor、pagenoteIcon和rectInfo
   //方便后续更新pagenoteAnchor的样式            考虑到这个组件会频繁的更新所以这里采用useMemo()存储获取的信息
-  const [pagenoteAnchors, pagenoteIcon, rectInfo] = useMemo(() => {
+  const [pagenoteAnchors, pagenoteIcon] = useMemo(() => {
     //包含当前pagenoteFragment.textStart文本的一系列节点
     const pagenoteAnchors = Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${props.contentPagenote.pagenoteID}"]`))
     //pagenoteAnchors节点后面跟随的图标，用于响应后续弹出pagenoteTools
     const pagenoteIcon = document.querySelector(`pagenoteicon[pagenoteid="${props.contentPagenote.pagenoteID}"]`)
     //最后一个节点的宽高信息，主要使用rectInfo.height设置pagenoteTools的位置
     const rectInfo = pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect()
-    return [pagenoteAnchors, pagenoteIcon, rectInfo]
-  }, [])
+    setContentPagenote(contentPagenote => {
+      return ({
+        ...contentPagenote,
+        anchorPositionX: getToolsSuitablePositionX(window.scrollX + rectInfo.left + rectInfo.width, 272),
+        anchorPositionY: window.scrollY + rectInfo.top + rectInfo.height,
+      })
+    })
+      
+    
+
+    return [pagenoteAnchors, pagenoteIcon]
+  },[])
+
+  // const [rectInfo,setRectInfo]=useState(pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect())
+
+  useEffect(()=>{
+    const resetToolsPosition=()=>{
+      const rectInfo = pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect()
+      setContentPagenote(contentPagenote => {
+        return ({
+          ...contentPagenote,
+          anchorPositionX: getToolsSuitablePositionX(window.scrollX + rectInfo.left + rectInfo.width, 272),
+          anchorPositionY: window.scrollY + rectInfo.top + rectInfo.height,
+        })
+      })
+    }
+
+    // resetToolsPosition()
+    window.addEventListener('resize',resetToolsPosition)
+
+    return ()=>{
+      window.removeEventListener('resize',resetToolsPosition)
+    }
+  },[])
 
   //监听contentPagenote.showEditor
   //如果为真的话就直接在页面上显示editor的内容
@@ -70,13 +110,14 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
     if (props.contentPagenote.showEditor) {
       setTool('setPagenote')
     }
-  }, [props.contentPagenote.showEditor])
+    setContentPagenote(contentPagenote=>({
+      ...contentPagenote,
+      showEditor:props.contentPagenote.showEditor,
+      showEditorTitle:props.contentPagenote.showEditorTitle,
+      showEditorTools:props.contentPagenote.showEditorTools,
+    }))
+  }, [props.contentPagenote])
 
-  //组件状态设置
-  //--------------------------------------------------------------------------
-  //
-  const [contentPagenote, setContentPagenote] = useState(props.contentPagenote)
-  const [tool, setTool] = useState<TTool>('')
 
   //检测更新pagenoteAnchor和pagenoteIcon的样式
   useEffect(() => {
@@ -89,7 +130,12 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
     event.stopPropagation()
     console.log('tools icon click')
     // setSaveContentPagenote(true)
-    setContentPagenote(contentPagenote => ({ ...contentPagenote, showTools: true, }))
+    setContentPagenote(contentPagenote => ({ 
+      ...contentPagenote, 
+      showTools: true, 
+      anchorPositionX:getToolsSuitablePositionX(window.scrollX+pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().left+pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().width,272),
+      anchorPositionY:window.scrollY+pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().top+pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().height,
+    }))
     setTool('')
     window.getSelection()?.removeAllRanges()
   }
@@ -109,7 +155,8 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
           ( contentPagenote.pagenoteStyle.color||
             contentPagenote.pagenoteStyle.backgroundColor||
             contentPagenote.pagenoteStyle.fontWeight||
-            contentPagenote.pagenoteStyle.fontStyle))||
+            contentPagenote.pagenoteStyle.fontStyle||
+            contentPagenote.pagenoteStyle.textDecoration))||
         //检测pagenoteContent是否与默认的pagenoteContent相同
         contentPagenote.pagenoteContent != ((contentPagenote.pagenoteFragment?.prefix??'')+
                                             (contentPagenote.pagenoteFragment?.textStart??'')+
@@ -120,7 +167,10 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
     ) {
       //符合上述条件的pagenoteContent会被认为是一个有效的pagenote
       setTool('')
-      setContentPagenote(contentPagenote => ({ ...contentPagenote, showTools: false, }))
+      setContentPagenote(contentPagenote => {
+        chrome.runtime.sendMessage({operation:EOperation.savePagenote,value:{ ...contentPagenote, showTools: false, }})
+        return ({ ...contentPagenote, showTools: false, })
+      })
     } else {
       props.setAllPagenotesInfo(allPagenotesInfo => {
         return allPagenotesInfo.filter(pagenote => pagenote?.contentPagenote.pagenoteID != contentPagenote.pagenoteID)
@@ -141,49 +191,61 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
       }}
     >
       {
-        tool != 'setPagenote' ? <ClickAwayListener onClickAway={handlerClickAway}>
-          <Box
-            sx={{
-              position: 'relative',
-              display: 'inline-block',
-              lineHeight: 1,
-            }}
-            onMouseUp={handlerBoxMouseUp}
-          >
-            <DescriptionIcon
-              onClick={e => handlerIconClick(e)}
-              sx={{
-                width: rectInfo.height - rectInfo.height / 4,
-                height: rectInfo.height - rectInfo.height / 4,
-                verticalAlign: 'bottom',
-              }}>
-            </DescriptionIcon>{
-              contentPagenote.showTools ?
-                <ToolsButtonGroup
-                  orientation="horizontal"
-                  sx={{
-                    top: rectInfo.height,
-                    height: rectInfo.height,
-                    display: 'inline-flex',
-                    zIndex:999,
-                    overflow:'visible',
-                  }}
-                >
-                  <ToolsSetFontColor fontColor={contentPagenote.pagenoteStyle?.color}/>
-                  <ToolsSetBackgroundColor backgroundColor={contentPagenote.pagenoteStyle?.backgroundColor}/>
-                  <ToolsSetFontBold />
-                  <ToolsSetFontItalic />
-                  <ToolsSetFontOverline overline={contentPagenote.pagenoteStyle?.textDecoration??''}/>
-                  <ToolsSetFontStrikethrough strikethrough={contentPagenote.pagenoteStyle?.textDecoration??''}/>
-                  <ToolsSetFontUnderline underline={contentPagenote.pagenoteStyle?.textDecoration??''}/>
-                  {/* <ToolsSetCustomStyle /> */}
-                  <ToolsSetPagenote />
-                  <ToolsDelete />
-                </ToolsButtonGroup> : ''
+        tool != 'setPagenote'&&contentPagenote.showEditor==false ?
+          <Fragment>
+            {
+              pagenoteIcon &&
+              createPortal(<DescriptionIcon
+                onClick={e => handlerIconClick(e)}
+                sx={{
+                  width: pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().height,
+                  height: pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().height,
+                  verticalAlign: 'bottom',
+                }}>
+              </DescriptionIcon>,
+                pagenoteIcon)
             }
-          </Box>
-        </ClickAwayListener> :
-          <Editor />
+            {
+                  contentPagenote.showTools ?
+            <ClickAwayListener onClickAway={handlerClickAway}>
+              <Box
+                sx={{
+                  display: 'inline-block',
+                  lineHeight: 1,
+                }}
+                onMouseUp={handlerBoxMouseUp}
+              >
+                
+                    <ToolsButtonGroup
+                      orientation="horizontal"
+                      sx={{
+                        // top: window.scrollY+rectInfo.top+rectInfo.height,
+                        // left: getToolsSuitablePositionX(window.scrollX+rectInfo.left+rectInfo.width,272),
+                        top:contentPagenote.anchorPositionY,
+                        left:contentPagenote.anchorPositionX,
+                        height: pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().height,
+                        display: 'inline-flex',
+                        zIndex: 999,
+                        overflow: 'visible',
+                      }}
+                    >
+                      <ToolsSetFontColor fontColor={contentPagenote.pagenoteStyle?.color} />
+                      <ToolsSetBackgroundColor backgroundColor={contentPagenote.pagenoteStyle?.backgroundColor} />
+                      <ToolsSetFontBold />
+                      <ToolsSetFontItalic />
+                      <ToolsSetFontOverline overline={contentPagenote.pagenoteStyle?.textDecoration ?? ''} />
+                      <ToolsSetFontStrikethrough strikethrough={contentPagenote.pagenoteStyle?.textDecoration ?? ''} />
+                      <ToolsSetFontUnderline underline={contentPagenote.pagenoteStyle?.textDecoration ?? ''} />
+                      {/* <ToolsSetCustomStyle /> */}
+                      <ToolsSetPagenote />
+                      <ToolsDelete />
+                    </ToolsButtonGroup> 
+              </Box>
+            </ClickAwayListener>: ''
+                }
+          </Fragment> :
+          ( contentPagenote.editorPosition == EPosition.afterPagenoteFragment &&
+            pagenoteIcon ? createPortal(<Editor />, pagenoteIcon) : <Editor />)
       }
     </PagenoteAnchorContext.Provider>
   )
@@ -210,4 +272,21 @@ function setEleStyle(pagenoteIcon: HTMLElement, targetEles: HTMLElement[], style
       targetEle.style[styleAttr] = style[styleAttr] ?? ''
     }
   })
+}
+/**
+ * 这个函数获取一个横向坐标避免pagenoteTools超出屏幕
+ * @param originPositionX 原始的横向位置
+ * @param toolsWidth pagenoteTools的宽度
+ * @returns 新的位置
+ */
+function getToolsSuitablePositionX(originPositionX:number,toolsWidth:number){
+  let newX=toolsWidth
+  if(originPositionX<=toolsWidth/2){
+    newX=toolsWidth/2
+  }else if(originPositionX>toolsWidth/2&&originPositionX < document.documentElement.clientWidth-toolsWidth/2){
+    newX=originPositionX
+  }else if(originPositionX>=document.documentElement.clientWidth-toolsWidth/2){
+    newX=document.documentElement.clientWidth-toolsWidth/2
+  }
+  return newX
 }

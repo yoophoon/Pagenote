@@ -18,15 +18,15 @@ export default function Editor() {
   const pagenoteAnchorContext=useContext(PagenoteAnchorContext)
   if(pagenoteAnchorContext==null) return
   const {contentPagenote, setContentPagenote, setTool}=pagenoteAnchorContext
-  const positionedEditor=getPositionedEditor(contentPagenote.pagenotePosition)
+  const positionedEditor=getPositionedEditor(contentPagenote.editorPosition)
 
   //初始化editorStatus
   const [editorStatus,setEditorStatus]=useState<TEditorStatus>({
     pagenoteID:contentPagenote.pagenoteID,
-    title:contentPagenote.pagenoteTitle??'',
+    title:contentPagenote.pagenoteTitle,
     titleID:useId(),
-    content:contentPagenote.pagenoteContent??'',
-    markupContent:markUpStr(contentPagenote.pagenoteContent??''),
+    content:contentPagenote.pagenoteContent,
+    markupContent:markUpStr(contentPagenote.pagenoteContent),
     contentID:useId(),
     selectStart:0,
     selectEnd:0,
@@ -34,24 +34,10 @@ export default function Editor() {
     showTitle:contentPagenote.showEditorTitle,
     showTools:contentPagenote.showEditorTools,
     renderMarkdown:contentPagenote.renderMarkdown,
+    editorPositionX:contentPagenote.anchorPositionX??0,
+    editorPositionY:contentPagenote.anchorPositionY??0,
   })
 
-  //退出editor时更新pagenoteTitle、pagenoteContent、showTools及showEditor
-  useEffect(()=>{
-    if(!editorStatus.open){
-      setContentPagenote(contentPagenote=>({
-        ...contentPagenote,
-        pagenoteTitle:editorStatus.title,
-        pagenoteContent:editorStatus.content,
-        showTools:!editorStatus.open,
-        showEditor:editorStatus.open,
-        showEditorTitle:editorStatus.showTitle,
-        showEditorTools:editorStatus.showTools,
-        renderMarkdown:editorStatus.renderMarkdown,
-      }))
-      setTool('')
-    }
-  },[editorStatus.open])
 
   //处理editor在a标签打开的情况
   useEffect(()=>{
@@ -72,6 +58,36 @@ export default function Editor() {
       else closest.setAttribute('draggable',originDragStatus)
     }
   },[])
+
+  //退出editor时更新pagenoteTitle、pagenoteContent、showTools及showEditor
+  useEffect(()=>{
+    if(!editorStatus.open){
+      setContentPagenote(contentPagenote=>({
+        ...contentPagenote,
+        pagenoteTitle:editorStatus.title,
+        pagenoteContent:editorStatus.content,
+        showTools:!editorStatus.open,
+        showEditor:editorStatus.open,
+        showEditorTitle:editorStatus.showTitle,
+        showEditorTools:editorStatus.showTools,
+        renderMarkdown:editorStatus.renderMarkdown,
+      }))
+      setTool('')
+    }
+  },[editorStatus.open])
+
+  //监听传过来的contentpagenote
+  useEffect(() => {
+    setEditorStatus(editorStatus => ({
+      ...editorStatus,
+      showTitle: contentPagenote.showEditorTitle,
+      showTools: contentPagenote.showEditorTools,
+      renderMarkdown: contentPagenote.renderMarkdown,
+      editorPositionX: contentPagenote.anchorPositionX ?? 0,
+      editorPositionY: contentPagenote.anchorPositionY ?? 0,
+    }))
+  }, [contentPagenote])
+
 
   return (
     <EditorContext.Provider value={{

@@ -1,7 +1,7 @@
 //import { PagenoteFragmentPresentation } from "./pagenoteFragmentPresentation";
 // import { generateFragment } from "./pagenoteFragmentGeneration"
 
-import { EOperation, EPosition, TMessageToEditor, TPagenote, TPagenoteNodes } from "../../../pagenoteTypes"
+import { EOperation, EPosition, TMessageToEditor, TPagenote, TPagenoteFragment, TPagenoteNodes } from "../../../pagenoteTypes"
 import { PagenoteGeneration } from "./pagenoteGeneration"
 
 
@@ -68,7 +68,7 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
     //添加笔记
     const contentPagenote: TPagenote = {
 
-        pagenotePosition: pagenotePosition,
+        editorPosition: pagenotePosition,
         pagenoteID,
         pagenoteIndex: pagenoteNodes.startIndex,
         pagenoteTitle: pagenoteFragment.textStart,
@@ -121,4 +121,16 @@ function getPagenotePosition(pagenoteEles: HTMLElement[]) {
     return EPosition.followPagenoteFragment
 }
 
-
+export function getPagenoteFragmentEleAnchor(pagenoteFragment:TPagenoteFragment){
+    const pagenote = new PagenoteGeneration()
+    const pagenoteNodes=pagenote.getPagenoteNodes(pagenoteFragment)
+    if (pagenoteNodes == undefined) {
+        console.log('pagenoteFragment:', pagenoteFragment)
+        console.log('pagenoteFragment为空,或者其对应不止一处文本,生成pagenoteNodes失败')
+        return
+    }
+    console.log('pagenoteFragment:', pagenoteFragment)
+    console.log('pagenoteNodes', pagenoteNodes)
+    //获取pagenote
+    return pagenote.setPagenote(pagenoteNodes)
+}

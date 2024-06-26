@@ -10,13 +10,19 @@ export default function EditorSetHead() {
   const handlerSetHeadClick = () => {
     const { selectStart, selectEnd, content } = editorStatus
     let newContent = ''
+    let newCaretPositionStart=-1,newCaretPositionEnd=-1
+
     if (selectStart == selectEnd) {
       if (content.slice(0, selectStart).replace(/ /g,'').endsWith('\n')||
           content.slice(0, selectStart).replace(/ /g,'')=='') {
-        newContent =  content.slice(0, selectStart) +
+            newCaretPositionStart=selectStart
+            newCaretPositionEnd=selectStart+2
+            newContent =  content.slice(0, selectStart) +
                       '# ' +
                       content.slice(selectStart)
       } else {
+        newCaretPositionStart=selectStart+1
+        newCaretPositionEnd=selectStart+3
         newContent =  content.slice(0, selectStart) +
                       '\n# ' + 
                       content.slice(selectStart)
@@ -24,12 +30,16 @@ export default function EditorSetHead() {
     } else {
       if (content.slice(0, selectStart).replace(/ /g,'').endsWith('\n')||
           content.slice(0, selectStart).replace(/ /g,'')=='') {
-        newContent =  content.slice(0, selectStart) + 
+            newCaretPositionStart=selectStart
+            newCaretPositionEnd=selectStart+2
+            newContent =  content.slice(0, selectStart) + 
                       '# ' + 
                       content.slice(selectStart, selectEnd) + 
                       '\n' +
                       content.slice(selectEnd)
       } else {
+        newCaretPositionStart=selectStart+1
+        newCaretPositionEnd=selectStart+3
         newContent =  content.slice(0, selectStart) + 
                       '\n# ' + 
                       content.slice(selectStart, selectEnd) + 
@@ -37,10 +47,14 @@ export default function EditorSetHead() {
                       content.slice(selectEnd)
       }
     }
-    setEditorStatus(editorStatus=>({
-      ...editorStatus,
-      content:newContent,
-    }))
+    setEditorStatus(editorStatus=>{
+      return ({
+        ...editorStatus,
+        content:newContent,
+        selectStart:newCaretPositionStart,
+        selectEnd:newCaretPositionEnd,
+      })
+    })
   }
 
   return (

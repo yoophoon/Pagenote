@@ -12,7 +12,6 @@ export default function ToolsSetFontOverline({overline}:overline) {
     if (AnchorContext == null) {
         return <></>
     }
-    console.log(overline)
     const { setContentPagenote, setTool } = AnchorContext
 
     const handlerFontOverlineClick = (e: React.MouseEvent) => {

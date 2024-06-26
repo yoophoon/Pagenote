@@ -2,6 +2,7 @@ import { IconButton, Tooltip, Zoom } from "@mui/material";
 import React, { useContext} from "react";
 import { PagenoteAnchorContext } from "../PagenoteIcon";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { EOperation } from "../../../pagenoteTypes";
 
 /**
  * 这个组件用于删除当前pagenote
@@ -21,6 +22,7 @@ export default function ToolsDelete() {
             return contentPagenotes.filter(pagenote => pagenote?.contentPagenote.pagenoteID != contentPagenote.pagenoteID)
         })
         deleteAnchorAndIcon(contentPagenote.pagenoteID)
+        chrome.runtime.sendMessage({operation:EOperation.deletePagenote,value:{pagenoteID:contentPagenote.pagenoteID}})
     }
 
     return (

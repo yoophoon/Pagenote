@@ -25,8 +25,9 @@ export const PickerCanvas = React.forwardRef((props: any, ref: any) => {
     }, [canvasRGB])
 
     function createColor() {
+        console.log('fuck canvas')
         if (pickercanvas == null) return
-        const ctx = pickercanvas.getContext("2d");
+        const ctx = pickercanvas.getContext("2d", { willReadFrequently: true });
         if (ctx == null) return
         ctx.clearRect(0, 0, 300, 110)
         const lgrd = ctx.createLinearGradient(0, 0, 300, 1,)

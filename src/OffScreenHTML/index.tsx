@@ -54,7 +54,7 @@ function getIMGData(url: string,response:(response:any)=>void) {
         const url = URL.createObjectURL(new Blob([result.buffer], { type: "image/*" }))
         console.log(url)
         console.log(result)
-        response({response:url})
+        response({response123:url})
         return url
     })
 }

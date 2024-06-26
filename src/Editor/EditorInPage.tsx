@@ -5,15 +5,15 @@ import EditorContent from "./components/EditorContent";
 import zIndex from "@mui/material/styles/zIndex";
 import { EditorContext } from ".";
 import { useContext } from "react";
-import EditorSetting from "./components/EditorSetting";
 const style = {
     position: 'absolute',
-    top: '100%',
-    left: '50%',
-    transform: 'translate(-50%, 0)',
     boxShadow: 24,
     p: 2,
     'resize':"both",
+    overflow:'auto',
+    minWidth:'300px',
+    minHeight:'200px',
+    height:'200px',
     zIndex:999,
   };
 
@@ -22,12 +22,17 @@ export default function EditorInPage(){
   if(editorContext==null) return
   const {editorStatus,setEditorStatus}=editorContext
     return (<Box
-        sx={style}
+        sx={{
+          ...style,
+          top:editorStatus.editorPositionY,
+          left:editorStatus.editorPositionX,
+          transform:'translate(-50%,0)',
+        }}
         bgcolor={"background.default"}
         color={'text.primary'}
         id='pagenoteEditor'
       >
-      <EditorSetting/>
+      {/* <EditorSetting/> */}
       {editorStatus.showTitle&&<>
         <EditorTitle />
         <Divider aria-hidden="false" />

@@ -13,9 +13,12 @@ export enum EOperation {
     openEditor,
     openNotesInSidepanel,
     savePagenote,
+    deletePagenote,
     getPagenotes,
     render,
-    sidePanel
+    sidePanel,
+    siteConfig,
+    getSiteConfig,
 }
 
 export enum EPosition {
@@ -78,8 +81,10 @@ export interface TPagenoteStyle extends Partial<CSSStyleDeclaration>{
 export type TPagenote = {
     pagenoteID: number,
     pagenoteTimestamp: number,
+    //记录pagenoe的网址
     pagenoteTarget:string,
-    pagenotePosition:EPosition,
+    //editor该显示的位置
+    editorPosition:EPosition,
     showTools:boolean,
     showEditor:boolean,
     showEditorTitle:boolean,
@@ -89,8 +94,11 @@ export type TPagenote = {
     pagenoteIndex: number,
     pagenoteFragment?: TPagenoteFragment,
     pagenoteStyle?: TPagenoteStyle,
-    pagenoteTitle?: string,
-    pagenoteContent?: string,
+    pagenoteTitle: string,
+    pagenoteContent: string,
+    //anchorPosition为笔记插入点的绝对位置，为了使pagenote的元素独立于页面元素，需要使用这些数据记录位置信息
+    anchorPositionX?:number,
+    anchorPositionY?:number,
 }
 
 export type TMessageToEditor = {
@@ -114,4 +122,54 @@ export type TEditorStatus={
     showTitle:boolean,
     showTools:boolean,
     renderMarkdown:boolean,
+    editorPositionX:number,
+    editorPositionY:number,
 }
+
+export enum ESiteTheme{
+    dark,
+    light,
+    systemDefault,
+}
+
+export type TSiteConfig={
+    origin:string,
+    siteTheme:ESiteTheme,
+    showPagenote:boolean,
+    showPositionBar:boolean,
+    onThisSite:boolean,
+    showEditorTitle:boolean,
+    showEditorTools:boolean,
+}
+
+export type TSetSiteConfig=React.Dispatch<React.SetStateAction<TSiteConfig>>
+
+
+
+declare module '@mui/material/styles' {
+    interface Theme {
+      pagenote: {
+        pagenoteEditor:{
+          title:{
+            height:number
+          },
+          tools:{
+            height:number
+          }
+        }
+      };
+    }
+    // allow configuration using `createTheme`
+    interface ThemeOptions {
+      pagenote?: {
+        pagenoteEditor:{
+          title:{
+            height:number
+          },
+          tools:{
+            height:number
+          }
+        }
+      };
+    }
+  }

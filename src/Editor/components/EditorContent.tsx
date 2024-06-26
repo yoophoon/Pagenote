@@ -1,4 +1,4 @@
-import { Paper, styled } from "@mui/material";
+import { Paper, styled, useTheme } from "@mui/material";
 import { Root } from 'hast'
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime'
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime'
@@ -21,18 +21,23 @@ import '@fontsource/roboto/700.css';
 // import remarkGfm from 'remark-gfm'
 // import remarkToc from 'remark-toc'
 import { EOperation, ERenderTarget } from '../../pagenoteTypes'
-import '@wooorm/starry-night/style/both'
+import '@wooorm/starry-night/style/both' 
+//关于导入css的问题
+//https://www.bilibili.com/video/av892934722/?p=1&t=334
+//https://vitejs.dev/guide/features.html#glob-import
+// import markupDark from 'github-markdown-css?raw'
+// import 'github-markdown-css'
 import MarkupRender from "../../Background/MarkdownRender";
 
 const MarkdownPresentation = styled('div')(({ theme }) => ({
     ...theme.typography.body2,
     position: 'absolute',
     inset: 0,
-    width: 700,
+    width: '100%',
     height: 'fit-content',
     margin:0,
     marginTop:5,
-    minHeight: 700,
+    // minHeight: 700,
     lineHeight: 1.3,
     fontSize: theme.typography.fontSize,
     overflow: 'hidden',
@@ -51,6 +56,7 @@ const MarkdownPresentation = styled('div')(({ theme }) => ({
         position: 'relative',
         margin:'0 !important',
         paddingLeft: 25,
+        width:'calc(100% - 26px)',
     },
     '& > *::before': {
         counterIncrement: 'lineRow',
@@ -61,7 +67,7 @@ const MarkdownPresentation = styled('div')(({ theme }) => ({
         top: 0,
         width: 21,
         height: '100%',
-        'text-align': 'right',
+        textAlign: 'right',
         borderRight: '1px solid red',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
@@ -73,11 +79,11 @@ const UserTextArea = styled('textarea')(({ theme }) => ({
     ...theme.typography.body2,
     textAlign: 'left',
     // color: "#00000000",
-    width: 700,
+    width:'calc(100% - 26px)',
     height: 'fit-content',
     position: 'absolute',
     inset: 0,
-    minHeight: 700,
+    // minHeight: 700,
     lineHeight: 1.3,
     margin:0,
     marginTop:5,
@@ -99,9 +105,7 @@ const UserTextArea = styled('textarea')(({ theme }) => ({
 const EditorContentContainer = styled(Paper)(({ theme }) => ({
     fontSize: theme.typography.fontSize,
     position: 'relative',
-    width: 700,
-    height: 700,
-    overflow: 'auto',
+    width:'100%'
 }))
 
 
@@ -115,13 +119,15 @@ export default function EditorContent() {
     // const [isPending,startTransition]=useTransition()
     const [vfile, setVfile] = useState({
         content: editorContext.editorStatus.content,
-        renderedContent: '',
         color:'#00000000',
         'background-color':'#00000000',
         selectionStart:0,
         selectionEnd:0,
         renderPort:chrome.runtime.connect({ name: 'renderport' }),
+        blurFocus:false,
     })
+    const [highlightMarkdown,setHightlightMarkdown]=useState('')
+    const theme=useTheme()
     // const [renderPort, setRenderPort] = useState<chrome.runtime.Port>()
 
     //在select事件中修改editorstatus的selectStart和selectEnd，方便其他组件获取数据
@@ -143,11 +149,19 @@ export default function EditorContent() {
     // }
 
     const handlerFocus=(e:React.FocusEvent<HTMLTextAreaElement, Element>)=>{
-        console.log('focus e',e)
+        // e.preventDefault()
+        // e.stopPropagation()
+        // console.log('focus e',e)
+        // console.log('editorStatus...',editorStatus)
+        // // e.target.focus()
+        // setTimeout(()=>{
+        //     e.target.setSelectionRange(editorStatus.selectStart,editorStatus.selectEnd,'forward')
+        // },10000)
         setVfile(vfile=>({
             ...vfile,
             color:'',
             "background-color":'',
+            blurFocus:false,
         }))
     }
 
@@ -181,21 +195,42 @@ export default function EditorContent() {
             "background-color":'#00000000',
             selectionEnd:e.target.selectionEnd,
             selectionStart:e.target.selectionStart,
+            blurFocus:false,
         }))
         console.log('blur e',e)
     }
 
     useEffect(()=>{
         console.log(editorStatus)
+        // const editorContentEle = document.querySelector(`#${CSS.escape(editorStatus.contentID)}`) as HTMLTextAreaElement
+        // if (editorContentEle) {
+        //     editorContentEle.focus()
+        //     editorContentEle.setSelectionRange(editorStatus.selectStart,editorStatus.selectEnd,'none')
+        // }
         vfile.renderPort.postMessage({
             operation: EOperation.render,
             value: {
                 target: ERenderTarget.hightlight,
-                content: editorStatus.content
+                content: editorStatus.content,
                 //.replace(/[ ]+/,' ').replace(/[ ]?\n[ ]?/,'\n').trimStart(),
             }
         })
+        setVfile(vfile=>({
+            ...vfile,
+            content:editorStatus.content,
+            selectionEnd:editorStatus.selectEnd,
+            selectionStart:editorStatus.selectStart,
+            blurFocus:true,
+        }))
     },[editorStatus.content])
+
+    useEffect(()=>{
+        const editorContentEle = document.querySelector(`#${CSS.escape(editorStatus.contentID)}`) as HTMLTextAreaElement
+        if (editorContentEle && vfile.blurFocus) {
+            editorContentEle.focus()
+            editorContentEle.setSelectionRange(vfile.selectionStart,vfile.selectionEnd,'none')
+        }
+    },[vfile.selectionStart,vfile.selectionEnd])
 
     useEffect(() => {
         if(!vfile.renderPort){
@@ -220,23 +255,28 @@ export default function EditorContent() {
                 return
             }
             console.log(response)
-            setVfile(vfile=>({
-                ...vfile,
-                content: response.content,
-                renderedContent: response.renderedContent,
-            }))
+            setHightlightMarkdown(response.renderedContent)
+            // setVfile(vfile=>({
+            //     ...vfile,
+            //     content: response.content,
+            //     renderedContent: response.renderedContent,
+            // }))
         })
         return ()=>{
             vfile.renderPort.disconnect()
         }
     }, [])
 
-    return (<EditorContentContainer>
+    return (<EditorContentContainer
+    sx={{height:`calc(100% - ${editorStatus.showTitle?theme.pagenote.pagenoteEditor.title.height:0}px - ${editorStatus.showTools?theme.pagenote.pagenoteEditor.tools.height:0}px - 2px)`}}
+    >
         {!editorStatus.renderMarkdown?
             <MarkdownPresentation className="draw"
                 id="pagenoteEditorContent"
-                dangerouslySetInnerHTML={{ __html: vfile.renderedContent }} /> :
-            <MarkdownPresentation className="draw" id="pagenoteEditorContent"                >
+                dangerouslySetInnerHTML={{ __html: highlightMarkdown }} /> :
+            <MarkdownPresentation 
+            className="draw markdown-body" 
+            id="pagenoteEditorContent"                >
                 <MarkupRender markdown={editorStatus.content}></MarkupRender>
             </MarkdownPresentation>
         }
