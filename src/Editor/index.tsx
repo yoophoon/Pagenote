@@ -1,9 +1,9 @@
-import { Box, Divider, Modal } from "@mui/material"
-import EditorTitle from './components/EditorTitle'
-import EditorToolBar from "./components/EditorToolBar"
-import EditorContent from "./components/EditorContent"
+// import { Box, Divider, Modal } from "@mui/material"
+// import EditorTitle from './components/EditorTitle'
+// import EditorToolBar from "./components/EditorToolBar"
+// import EditorContent from "./components/EditorContent"
 
-import { EPosition, TPagenote, TSetContentPagenotes, TEditorStatus} from "../pagenoteTypes"
+import { EPosition, TEditorStatus} from "../pagenoteTypes"
 import { createContext, useContext, useEffect, useId, useState } from "react"
 import {PagenoteAnchorContext} from '../Content/PagenoteTools/PagenoteIcon'
 
@@ -34,10 +34,15 @@ export default function Editor() {
     showTitle:contentPagenote.showEditorTitle,
     showTools:contentPagenote.showEditorTools,
     renderMarkdown:contentPagenote.renderMarkdown,
+    editorPosition:contentPagenote.editorPosition,
     editorPositionX:contentPagenote.anchorPositionX??0,
     editorPositionY:contentPagenote.anchorPositionY??0,
+    editorContentScrollTop:contentPagenote.editorContentScrollTop,
+    editorWidth:contentPagenote.editorWidth,
+    editorHeight:contentPagenote.editorHeight,
   })
 
+  console.log('initEditorStatus',editorStatus,contentPagenote)
 
   //处理editor在a标签打开的情况
   useEffect(()=>{
@@ -86,6 +91,7 @@ export default function Editor() {
       editorPositionX: contentPagenote.anchorPositionX ?? 0,
       editorPositionY: contentPagenote.anchorPositionY ?? 0,
     }))
+    console.log('contentPagenote update in editor')
   }, [contentPagenote])
 
 
@@ -104,50 +110,52 @@ export default function Editor() {
  * 
  * @returns true considered content exists while false considered no content
  */
-function hasContent(): boolean {
-  const pagenoteEditorContentEle = document.querySelector('#pagenoteEditorContent')
-  //if pagenoteEditor exsits and its innerhtml contains content except whitespace
-  if (pagenoteEditorContentEle &&
-    pagenoteEditorContentEle.innerHTML.replace(/[\n\r ]+/, '') != '') {
-    //ask user to confirm to leave or not
-    //if leave then the content considered null
-    const stillClose = confirm("编辑器存在内容，是否退出")
-    if (stillClose) return false
-  }
-  //if pagenoteEditor exsits and its innerhtml includes just whitespace
-  else if (pagenoteEditorContentEle &&
-    pagenoteEditorContentEle.innerHTML.replace(/[\n\r ]+/, '') == '') {
-    return false
-  }
-  return true
-}
+// function hasContent(): boolean {
+//   const pagenoteEditorContentEle = document.querySelector('#pagenoteEditorContent')
+//   //if pagenoteEditor exsits and its innerhtml contains content except whitespace
+//   if (pagenoteEditorContentEle &&
+//     pagenoteEditorContentEle.innerHTML.replace(/[\n\r ]+/, '') != '') {
+//     //ask user to confirm to leave or not
+//     //if leave then the content considered null
+//     const stillClose = confirm("编辑器存在内容，是否退出")
+//     if (stillClose) return false
+//   }
+//   //if pagenoteEditor exsits and its innerhtml includes just whitespace
+//   else if (pagenoteEditorContentEle &&
+//     pagenoteEditorContentEle.innerHTML.replace(/[\n\r ]+/, '') == '') {
+//     return false
+//   }
+//   return true
+// }
 
-function handlerExitEditor(pagenoteInfo: TPagenote, setAllPagenotesInfo: TSetContentPagenotes) {
-  setAllPagenotesInfo(allPagenotesInfo => {
-    return allPagenotesInfo.map(pagenote => {
-      if (pagenoteInfo.pagenoteID == pagenote?.contentPagenote.pagenoteID) {
-        pagenote = {
-          ...pagenote,
-          contentPagenote: {
-            ...pagenote.contentPagenote,
-            showEditor: false,
-          }
-        }
-      }
-      return pagenote
-    })
-  })
-}
+// function handlerExitEditor(pagenoteInfo: TPagenote, setAllPagenotesInfo: TSetContentPagenotes) {
+//   setAllPagenotesInfo(allPagenotesInfo => {
+//     return allPagenotesInfo.map(pagenote => {
+//       if (pagenoteInfo.pagenoteID == pagenote?.contentPagenote.pagenoteID) {
+//         pagenote = {
+//           ...pagenote,
+//           contentPagenote: {
+//             ...pagenote.contentPagenote,
+//             showEditor: false,
+//           }
+//         }
+//       }
+//       return pagenote
+//     })
+//   })
+// }
 
-import EditorInPage from "./EditorInPage"
+import EditorFollowPagenoteFragment from "./EditorFollowPagenoteFragment"
+import EditorAfterPagenoteFragment from "./EditorAfterPagenoteFragment"
 import { markUpStr } from "../lib/markUp"
 function getPositionedEditor(position:EPosition){
+  console.log('position...',position)
   if(position==EPosition.inPage){
     return <></>
   }else if(position==EPosition.followPagenoteFragment){
-    return <EditorInPage/>
+    return <EditorFollowPagenoteFragment />
   }else if(position==EPosition.afterPagenoteFragment){
-    
+    return <EditorAfterPagenoteFragment />
   }
   return <div>error on opening editor</div>
 }

@@ -22,7 +22,7 @@ function addANewNote() {
         const message: TMessageToEditor = {
             operation: EOperation.addPagenote,
             value: {
-                pagenotePosition: EPosition.inPage,
+                editorPosition: EPosition.inPage,
                 pagenoteID: new Date().getTime(),
                 pagenoteTitle: 'new pagenote',
                 pagenoteContent: '',
@@ -31,6 +31,9 @@ function addANewNote() {
                 pagenoteIndex:-1,
                 showTools:false,
                 showEditor:true,
+                showEditorTitle:true,
+                showEditorTools:true,
+                renderMarkdown:false,
             }
         }
         if (tabs[0].id)

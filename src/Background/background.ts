@@ -3,7 +3,7 @@ import { toHtml } from 'hast-util-to-html'
 import { EOperation, ERenderTarget, TPagenote } from '../pagenoteTypes'
 import { nodesInline } from './lib'
 import pagenoteDB from './storeage/pagenoteDB'
-import markupRender, { getStaticMarkUp } from './MarkdownRender'
+// import markupRender, { getStaticMarkUp } from './MarkdownRender'
 // import markupRender from './MarkdownRender'
 
 
@@ -62,7 +62,7 @@ pnChannel.onmessage=e=>{
     console.log(e)
 }
 
-const extensionURL = chrome.runtime.getURL('')
+// const extensionURL = chrome.runtime.getURL('')
 
 
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
@@ -71,7 +71,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
             
     })
     
-    if (operation == EOperation.openNotesInSidepanel) {
+    if (operation == EOperation.openNotesInSidepanel&& sender) {
         //background无法使用window对象，这里通过message获取其他区域脚本传过来的origin
         //方便作为sidepanel的地址
         // let SidepanelPath = extensionURL + 'sidepanel.html'
@@ -138,7 +138,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
 chrome.runtime.onMessage.addListener(function (message,sender,sendResponse){
     const { operation } = message
-    if (operation == EOperation.savePagenote) {
+    if (operation == EOperation.savePagenote && sender) {
         const contentPagenote:TPagenote=message.value
         console.log('store pagenote',message)
         pagenoteDB.transaction('rw', pagenoteDB.pagenote, ()=>{
@@ -172,7 +172,7 @@ chrome.runtime.onMessage.addListener(function (message,sender,sendResponse){
  */
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     const { operation } = message
-    if(operation==EOperation.siteConfig){
+    if(operation==EOperation.siteConfig && sender){
         console.log(message)
         pagenoteDB.transaction('rw', pagenoteDB.sitesConfig, ()=>{
             pagenoteDB.sitesConfig.put(message.value,message.value.origin)

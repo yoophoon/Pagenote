@@ -1,4 +1,4 @@
-import { TPagenote, EOperation, EPosition, TSetContentPagenotes, TMessageToEditor} from "../pagenoteTypes";
+import {  EOperation, EPosition, TSetContentPagenotes, TMessageToEditor} from "../pagenoteTypes";
 
 export default function RegistMessageListener(setPagenotesInfo: TSetContentPagenotes)
 {

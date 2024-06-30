@@ -1,5 +1,5 @@
 import { IconButton, Tooltip, Zoom } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import  { useContext } from "react";
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 
@@ -14,16 +14,16 @@ export default function ToolsSetCustomStyle() {
         return <></>
     }
 
-    const { setTool } = AnchorContext
+    // const { setTool } = AnchorContext
 
     
 
-    const handlerFontBoldClick = (e: React.MouseEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        window.getSelection()?.removeAllRanges()
-        setTool('setFontBold')
-    }
+    // const handlerFontBoldClick = (e: React.MouseEvent) => {
+    //     e.preventDefault()
+    //     e.stopPropagation()
+    //     window.getSelection()?.removeAllRanges()
+    //     setTool('setFontBold')
+    // }
 
     return (
         <IconButton

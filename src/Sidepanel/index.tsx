@@ -1,7 +1,7 @@
 // import React from 'react'
-import ReactDOM from 'react-dom/client'
-import {Markdown} from '../lib/react-markdown-editor'
-import remarkGfm from 'remark-gfm'
+// import ReactDOM from 'react-dom/client'
+// import {Markdown} from '../lib/react-markdown-editor'
+// import remarkGfm from 'remark-gfm'
 import { EOperation } from '../pagenoteTypes'
 // import { renderToStaticMarkup } from 'react-dom/server';
 // function PagenoteList() {
@@ -24,7 +24,7 @@ import { EOperation } from '../pagenoteTypes'
 
 
 chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
-    if(message.operation==EOperation.sidePanel){
+    if(message.operation==EOperation.sidePanel&&sender){
         console.log(message.value)
     }
     sendResponse({value:"roger fuck u"})

@@ -1,14 +1,14 @@
 import { Box, ClickAwayListener, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { Fragment, useContext, useState } from "react";
-import { TSiteConfig, TSetSiteConfig, EOperation} from "../../pagenoteTypes";
+import {  useContext, useState } from "react";
+import { EOperation} from "../../pagenoteTypes";
 import SiteTheme from "./SiteTheme";
 import SitePositionBar from "./SitePositionBar";
 import SitePagenote from "./SitePagenote";
 import SiteDisable from "./SiteDisable";
-import { useTheme } from "@emotion/react";
-import { Padding } from "@mui/icons-material";
-import zIndex from "@mui/material/styles/zIndex";
+// import { useTheme } from "@emotion/react";
+// import { Padding } from "@mui/icons-material";
+// import zIndex from "@mui/material/styles/zIndex";
 import { SiteConfigContext } from "../ContentPagenotes";
 import SiteShowTitle from "./SiteShowTitle";
 import SiteShowTools from "./SiteShowTools";
@@ -73,11 +73,12 @@ const style = {
   bottom: 5,
   right: 25,
   opacity: 0.35,
-  color:'primary.main',
-  backgroundColor:'',
+  color:'success.main',
+  backgroundColor:'background.default',
   zIndex:999,
   "&:hover": {
     opacity: 1,
+    color:'secondary.main',
     backgroundColor:'warning.main'
   }
 }

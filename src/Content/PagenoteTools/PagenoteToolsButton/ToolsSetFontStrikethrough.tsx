@@ -1,5 +1,5 @@
 import { IconButton, Tooltip, Zoom } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext} from "react";
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 import StrikethroughSIcon from '@mui/icons-material/StrikethroughS';
 

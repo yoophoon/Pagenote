@@ -1,8 +1,8 @@
 import { memo, useContext, useState } from "react"
 import { EditorContext } from ".."
 import { Box } from "@mui/material"
-import zIndex from "@mui/material/styles/zIndex"
-import { Opacity } from "@mui/icons-material"
+// import zIndex from "@mui/material/styles/zIndex"
+// import { Opacity } from "@mui/icons-material"
 
 const style={
   position:'absolute',

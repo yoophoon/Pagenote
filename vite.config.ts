@@ -14,6 +14,13 @@ const manifest = defineManifest({
     "runtime",
     "offscreen"
   ],
+  "icons":{
+    "16":"src/assets/pagenote16×16.png",
+    "32":"src/assets/pagenote32×32.png",
+    "64":"src/assets/pagenote64×64.png",
+    "128":"src/assets/pagenote128×128.png",
+    "300":"src/assets/pagenote300×300.png",
+  },
   "action": {
     "default_popup": "index.html",
     "default_title": "Record your idea&opinion"

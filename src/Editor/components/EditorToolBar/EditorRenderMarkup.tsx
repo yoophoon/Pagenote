@@ -1,10 +1,10 @@
 import { IconButton, SvgIcon, Tooltip, Zoom } from "@mui/material";
 import SvgMarkup from "../../../assets/svg/Markup";
 import SvgMarkdown from "../../../assets/svg/Markdown";
-import { useContext, useRef, useState } from "react";
+import { useContext, } from "react";
 import MarkupRender from "../../../Background/MarkdownRender";
 import { EditorContext } from "../..";
-import { EOperation, ERenderTarget } from "../../../pagenoteTypes";
+// import { EOperation, ERenderTarget } from "../../../pagenoteTypes";
 
 export default function EditorMarkup() {
 

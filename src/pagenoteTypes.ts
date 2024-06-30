@@ -1,5 +1,5 @@
-import { Root } from 'hast'
-import { Grammar } from '@wooorm/starry-night'
+// import { Root } from 'hast'
+// import { Grammar } from '@wooorm/starry-night'
 
 export type TPagenoteFragment = {
     prefix?: string,
@@ -37,13 +37,13 @@ export type TOpenEditor = {
 }
 
 //maybe used in the future
-interface starryNight {
-    flagToScope: (flag: string) => string | undefined;
-    highlight: (value: string, scope: string) => Root;
-    missingScopes: () => ReadonlyArray<string>;
-    register: (grammars: ReadonlyArray<Readonly<Grammar>>) => Promise<undefined>;
-    scopes: () => ReadonlyArray<string>;
-}
+// interface starryNight {
+//     flagToScope: (flag: string) => string | undefined;
+//     highlight: (value: string, scope: string) => Root;
+//     missingScopes: () => ReadonlyArray<string>;
+//     register: (grammars: ReadonlyArray<Readonly<Grammar>>) => Promise<undefined>;
+//     scopes: () => ReadonlyArray<string>;
+// }
 
 export interface IEditorProps extends React.HTMLAttributes<HTMLElement> {
     openEditor: TOpenEditor;
@@ -99,6 +99,9 @@ export type TPagenote = {
     //anchorPosition为笔记插入点的绝对位置，为了使pagenote的元素独立于页面元素，需要使用这些数据记录位置信息
     anchorPositionX?:number,
     anchorPositionY?:number,
+    editorContentScrollTop:number,
+    editorWidth:string,
+    editorHeight:string,
 }
 
 export type TMessageToEditor = {
@@ -122,8 +125,14 @@ export type TEditorStatus={
     showTitle:boolean,
     showTools:boolean,
     renderMarkdown:boolean,
+    //editorPosition为editor在页面的位置
+    editorPosition:EPosition,
+    //editorPositionX、editorPositionY是editor在页面绝对定位用的
     editorPositionX:number,
     editorPositionY:number,
+    editorContentScrollTop:number,
+    editorWidth:string,
+    editorHeight:string,
 }
 
 export enum ESiteTheme{

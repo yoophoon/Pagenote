@@ -1,8 +1,8 @@
 import { IconButton, Tooltip, Zoom } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { PagenoteAnchorContext } from '../PagenoteIcon'
 import EditNoteIcon from '@mui/icons-material/EditNote';
-import { TMessageToEditor } from "../../../pagenoteTypes";
+// import { TMessageToEditor } from "../../../pagenoteTypes";
 
 export default function ToolsSetPagenote() {
     const AnchorContext = useContext(PagenoteAnchorContext)
@@ -10,7 +10,7 @@ export default function ToolsSetPagenote() {
         return <></>
     }
 
-    const { contentPagenote,setContentPagenote,tool, setTool } = AnchorContext
+    const { setContentPagenote, setTool } = AnchorContext
 
     const handlerSetPagenote = (e: React.MouseEvent) => {
         e.preventDefault()

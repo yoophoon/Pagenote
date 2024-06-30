@@ -1,11 +1,11 @@
 import { createContext, useEffect, useRef, useState } from "react"
-import { createPortal } from "react-dom"
-import { PagenoteGeneration } from "./PagenoteTools/pagenoteFragment/pagenoteGeneration"
+// import { createPortal } from "react-dom"
+// import { PagenoteGeneration } from "./PagenoteTools/pagenoteFragment/pagenoteGeneration"
 import { TPagenote, EOperation, TContentPagenote, TSetContentPagenotes, TSiteConfig, ESiteTheme} from "../pagenoteTypes"
 import PagenoteIcon from "./PagenoteTools/PagenoteIcon"
 import RegistMessageListener from "./RegistMessageListener"
 import SiteConfig from "./SiteConfig/index"
-import { Box, ScopedCssBaseline, createTheme } from "@mui/material"
+import {  ScopedCssBaseline, createTheme } from "@mui/material"
 
 
 
@@ -19,28 +19,8 @@ export const SiteConfigContext=createContext<TSiteConfigContext|null>(null)
 
 export default function ContentPagenotes() 
 {
-    const pagenoteTheme = createTheme(
-        // {
-        //     palette: {
-        //         mode: 'dark'
-        //     }
-        // }
-        {
-          pagenote:{
-            pagenoteEditor:{
-              title:{
-                height:32
-              },
-              tools:{
-                height:36
-              }
-            }
-          }
-          
-        }
-    )
+  
 
-    console.log('pagenoteTheme...',pagenoteTheme)
     const [pagenotesInfo, setPagenotesInfo] = useState<TContentPagenote[]>([])
     const [siteConfig, setSiteConfig]=useState<TSiteConfig>({
         origin:window.location.origin+window.location.pathname,
@@ -52,6 +32,25 @@ export default function ContentPagenotes()
         onThisSite:true,
     })
     const previoutSiteCOnfig=useRef(siteConfig)
+
+    const pagenoteTheme = createTheme({
+      palette: {
+        mode: getThemeMode(siteConfig.siteTheme)
+      },
+      pagenote: {
+        pagenoteEditor: {
+          title: {
+            height: 32
+          },
+          tools: {
+            height: 36
+          }
+        }
+      }
+    })
+    console.log('pagenoteTheme...',pagenoteTheme)
+
+
     useEffect(() => {
         //处理页面第一次加载，从后台获取数据
         initPagenotes(setPagenotesInfo)
@@ -202,26 +201,26 @@ function initPagenotes(setPagenoteIcons: React.Dispatch<React.SetStateAction<TCo
     })
 }
 
-function presentPagenotes(contentPagenotes: TPagenote[])
-{
-    return contentPagenotes.map(contentPagenote => {
-        //如果pagenoteFragment不存在，说明这个contentPagenote是与网页内容无关的附加笔记
-        if (contentPagenote.pagenoteFragment == undefined) return 
-        //开始处理页面内的pagenote
-        const pagenoteGeneration = new PagenoteGeneration()
-        const pagenoteNodes = pagenoteGeneration.getPagenoteNodes(contentPagenote.pagenoteFragment)
-        //获取pagenoteFragment对应的元素
-        const pagenoteEles = pagenoteGeneration.setPagenote(pagenoteNodes)
-        //设置pagenoteFragment对应元素的pagenoteid属性
-        pagenoteEles.forEach(pagenoteEle => pagenoteEle.setAttribute('pagenoteid', contentPagenote.pagenoteID.toString()))
-        //添加末尾的图标
-        const pagenoteIcon = document.createElement('pagenoteicon')
-        pagenoteIcon.setAttribute('pagenoteid', contentPagenote.pagenoteID.toString())
-        pagenoteEles[pagenoteEles.length - 1].parentElement?.insertBefore(pagenoteIcon, pagenoteEles[pagenoteEles.length - 1])
-        pagenoteEles[pagenoteEles.length - 1].parentElement?.insertBefore(pagenoteEles[pagenoteEles.length - 1], pagenoteIcon)
-        return {pagenoteIcon,contentPagenote}
-    })
-}
+// function presentPagenotes(contentPagenotes: TPagenote[])
+// {
+//     return contentPagenotes.map(contentPagenote => {
+//         //如果pagenoteFragment不存在，说明这个contentPagenote是与网页内容无关的附加笔记
+//         if (contentPagenote.pagenoteFragment == undefined) return 
+//         //开始处理页面内的pagenote
+//         const pagenoteGeneration = new PagenoteGeneration()
+//         const pagenoteNodes = pagenoteGeneration.getPagenoteNodes(contentPagenote.pagenoteFragment)
+//         //获取pagenoteFragment对应的元素
+//         const pagenoteEles = pagenoteGeneration.setPagenote(pagenoteNodes)
+//         //设置pagenoteFragment对应元素的pagenoteid属性
+//         pagenoteEles.forEach(pagenoteEle => pagenoteEle.setAttribute('pagenoteid', contentPagenote.pagenoteID.toString()))
+//         //添加末尾的图标
+//         const pagenoteIcon = document.createElement('pagenoteicon')
+//         pagenoteIcon.setAttribute('pagenoteid', contentPagenote.pagenoteID.toString())
+//         pagenoteEles[pagenoteEles.length - 1].parentElement?.insertBefore(pagenoteIcon, pagenoteEles[pagenoteEles.length - 1])
+//         pagenoteEles[pagenoteEles.length - 1].parentElement?.insertBefore(pagenoteEles[pagenoteEles.length - 1], pagenoteIcon)
+//         return {pagenoteIcon,contentPagenote}
+//     })
+// }
 
 
 
@@ -275,6 +274,8 @@ function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
                 return pagenotesInfo
             }
         }
+        console.log('contentPagenote...',contentPagenote)
+        console.log('pagenoteEles...',pagenoteEles)
         selectEles(Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${contentPagenote.pagenoteID}"]`)))
         return [...pagenotesInfo, {
             pagenoteIcon,
@@ -292,9 +293,20 @@ function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
  * tools
  */
 
-function getPagenoteEditorContainer():Element{
-    const PagenoteEditor = document.querySelector('#pagenoteeditor') ?? document.createElement('div')
-    PagenoteEditor.id = 'pagenoteeditor'
-    document.documentElement.append(PagenoteEditor)
-    return PagenoteEditor
+// function getPagenoteEditorContainer():Element{
+//     const PagenoteEditor = document.querySelector('#pagenoteeditor') ?? document.createElement('div')
+//     PagenoteEditor.id = 'pagenoteeditor'
+//     document.documentElement.append(PagenoteEditor)
+//     return PagenoteEditor
+// }
+
+function getThemeMode(mode:ESiteTheme){
+  if(mode==ESiteTheme.dark){
+    return 'dark'
+  }else if(mode==ESiteTheme.light){
+    return 'light'
+  }else if(mode==ESiteTheme.systemDefault){
+    const themeMode=matchMedia('(prefers-color-scheme:dark)')
+    return themeMode.matches?'dark':'light'
+  }
 }

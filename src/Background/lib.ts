@@ -138,7 +138,7 @@ function processTextNode(text: string) {
  */
 
 
-import Dexie from 'dexie'
+// import Dexie from 'dexie'
 export function savePagenote(){
 
 }

@@ -1,6 +1,6 @@
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import CloseIcon from '@mui/icons-material/Close';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton } from '@mui/material';
 import { useContext } from 'react';
 import { SiteConfigContext } from '../ContentPagenotes';
 

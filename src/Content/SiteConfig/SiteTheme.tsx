@@ -1,5 +1,5 @@
 import ContrastIcon from '@mui/icons-material/Contrast';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton} from '@mui/material';
 import { memo, useContext } from 'react';
 import { SiteConfigContext } from '../ContentPagenotes';
 import { ESiteTheme } from '../../pagenoteTypes';

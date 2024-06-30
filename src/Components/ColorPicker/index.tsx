@@ -34,7 +34,7 @@ function getRGBA(rgbaStr:string|undefined){
   }
   return rgbaValue
 }
-
+//@ts-ignore
 export const ColorPicker = forwardRef((props: any,ref:any) => {
   const {color ,setColor } = props
   const { strR, strG, strB, strA } = getRGBA(color)
@@ -44,11 +44,12 @@ export const ColorPicker = forwardRef((props: any,ref:any) => {
     g: strG,
     b: strB,
   })
-
+  //@ts-ignore
   const PickerCanvasRef = useRef({ setCanvasRGB: (t: { r: number, g: number, b: number }) => { } })
 
   const handlerPaletteClick = (e: React.MouseEvent, color: string) => {
     console.log(color)
+    if(e){}
     setOpacity(255);
     if (colorCode[color as keyof typeof colorCode] != undefined) {
       const rgbCode = colorCode[color as keyof typeof colorCode].rgbCode
@@ -60,6 +61,9 @@ export const ColorPicker = forwardRef((props: any,ref:any) => {
     }
   }
   const handleSliderColorChange = (event: Event, newValue: number | number[]) => {
+    if(event){
+
+    }
     if (typeof newValue === 'number') {
       let r = newValue <= 255 ? 255 : (newValue <= 510 ? 510 - newValue : (newValue <= 1020 ? 0 : (newValue <= 1275 ? newValue - 1020 : 255)))
       let g = newValue <= 510 ? 0 : (newValue <= 765 ? newValue - 510 : (newValue <= 1275 ? 255 : 1530 - newValue))
@@ -71,6 +75,7 @@ export const ColorPicker = forwardRef((props: any,ref:any) => {
   };
 
   const handleOpacityChange = (event: Event, newValue: number | number[]) => {
+    if(event){}
     if (typeof newValue === 'number') {
       setOpacity(newValue);
     }

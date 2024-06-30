@@ -1,5 +1,5 @@
 import { styled } from "@mui/material";
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import React, {  useEffect, useImperativeHandle, useState } from "react";
 
 const Picker = styled('canvas')(() => ({
 

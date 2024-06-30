@@ -1,6 +1,6 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { Description } from "@mui/icons-material";
-import { EOperation } from "../../pagenoteTypes";
+// import { EOperation } from "../../pagenoteTypes";
 import Zoom from '@mui/material/Zoom'
 const extensionURL = chrome.runtime.getURL('')
 export function ShowSiteNotes() {

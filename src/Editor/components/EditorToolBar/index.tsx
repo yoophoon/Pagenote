@@ -11,7 +11,15 @@ export default function EditorToolBar() {
             height:theme.pagenote.pagenoteEditor.tools.height,
             width:'100%',
             overflow:'hidden',
+            display:'block',
+            "&>*":{
+                display:'inline-block',
+            }
+
         }}>
+            <EditorToolSplit />
+            <EditorClose />
+            <EditorToolSplit />
             <EditorSetHead />
             <EditorToolSplit />
             <EditorSetBold />
@@ -39,8 +47,7 @@ export default function EditorToolBar() {
             <EditorSetTable />
             <EditorToolSplit />
             <EditorMarkup />
-            <EditorToolSplit />
-            <EditorClose />
+            
             {/* <EditorSaveContent /> */}
         </ButtonGroup>)
 }

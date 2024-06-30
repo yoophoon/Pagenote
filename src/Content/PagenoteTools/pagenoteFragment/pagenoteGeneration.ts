@@ -11,6 +11,9 @@ export class PagenoteGeneration {
     constructor(selection: Selection | null = window.getSelection()) {
         if (selection && selection.toString() != '' && selection.getRangeAt(0)) {
             this._pagenoteRange = selection.getRangeAt(0)
+            if(this._pagenoteRange){
+
+            }
         }
     }
 
@@ -82,9 +85,9 @@ export class PagenoteGeneration {
             this.normalizeStr(range.toString()) == '' ||
             this.normalizeStr(range.toString()) == ' '
         ) return
-        let startContainer = range.startContainer
+        // let startContainer = range.startContainer
         let startOffset = range.startOffset
-        let endContainer = range.endContainer
+        // let endContainer = range.endContainer
         let endOffset = range.endOffset
 
         //所有文本节点的内容拼接之后的字符串，用于查询textStart是否时唯一的
@@ -93,7 +96,7 @@ export class PagenoteGeneration {
         //range中的文本节点
         let textNodesInRange: Node[] = [], textNodesInBody = this.getAllTextNodes()
         //range中的文本节点在body中的位置
-        let startNodeIndexInBody = -1, endNodeIndexInBody = -1
+        let startNodeIndexInBody = -1  //, endNodeIndexInBody = -1
         let pagenoteStartBoundary = -1, pagenoteEndBoundary = -1
         let segment: Intl.Segmenter | undefined = this.makeNewSegmenter()
         for (let i = 0; i < textNodesInBody.length; i++) {
@@ -106,7 +109,7 @@ export class PagenoteGeneration {
                 //第一次满足条件既能确定startNodeIndexInBody的值，后续无需进行更新
                 if (startNodeIndexInBody == -1) startNodeIndexInBody = i
                 //每次满足条件都对endNodeIndexInBody的值进行更新，最后一次更新的值即为endNodeIndexInBody的真实的值
-                endNodeIndexInBody = i
+                //endNodeIndexInBody = i
             }
             //对由文本节点拼接而成的字符串再次处理，防止由于行头和行尾的空格符号拼接而成的连续两个空白符号
             //allTextStr = this.normalizeStr(allTextStr)
@@ -324,7 +327,8 @@ export class PagenoteGeneration {
         pagenoteTextEndIndex = pagenoteTextStartIndex + pagenoteFragment.textStart.length
         for (let i = 0; i < allTextNodes.length; i++) {
             //处理包含pagenoteFragment文本的第一个节点，并将分割之后的节点数组赋值给pagenoteNodes
-            if (pagenoteTextStartIndex >= allTextNodesIndex[i] - this.normalizeStr(allTextNodes[i].nodeValue).length && pagenoteTextStartIndex < allTextNodesIndex[i]) {
+            if (pagenoteTextStartIndex >= allTextNodesIndex[i] - this.normalizeStr(allTextNodes[i].nodeValue).length && 
+                pagenoteTextStartIndex < allTextNodesIndex[i]) {
                 pagenoteNodes = allTextNodes.slice(i)
                 startOffset = pagenoteTextStartIndex + this.normalizeStr(allTextNodes[i].nodeValue).length - allTextNodesIndex[i]
             }
@@ -340,6 +344,7 @@ export class PagenoteGeneration {
             startOffset = this.getIndexInNodes(pagenoteNodes[0].nodeValue ?? '', pagenoteFragment.textStart, startOffset, true)
             endOffset = this.getIndexInNodes(pagenoteNodes[0].nodeValue ?? '', pagenoteFragment.textStart, endOffset, false)
         }
+        // console.log(startOffset,endOffset,'fuck position')
         return { startOffset, endOffset, pagenoteNodes,startIndex:pagenoteTextStartIndex }
     }
 
@@ -373,10 +378,11 @@ export class PagenoteGeneration {
      * 如果获取失败的话方法返回的数组两个值均为-1
      */
     getIndexInNode(query: string, container: string, originStart: number, originEnd: number) {
-        for (originStart; originStart <= query.length; originStart++) {
-            for (originEnd; originEnd <= query.length; originEnd++) {
-                if (container == this.normalizeStr(query.substring(originStart, originEnd))) {
-                    return [originStart, originEnd]
+        for (let starter=originStart; starter <= query.length; starter++) {
+            for (let ender=originEnd; ender <= query.length; ender++) {
+                const targetText=this.normalizeStr(query.substring(starter, ender))
+                if (container == targetText) {
+                    return [starter, ender]
                 }
             }
         }
@@ -432,14 +438,14 @@ export class PagenoteGeneration {
     markupPagenoteNode(node: Node, startIndex: number, endIndex: number) {
         let pagenoteEle = document.createElement('pagenoteanchor')
         if (node.nodeType == Node.TEXT_NODE) {
-            let nodeStr = this.normalizeStr(node.nodeValue)
+            // let nodeStr = this.normalizeStr(node.nodeValue)
             //设置pagenoteEle的文本
-            pagenoteEle.innerText = nodeStr.substring(startIndex, endIndex)
+            pagenoteEle.innerText = node.nodeValue?.substring(startIndex, endIndex)??''
             //设置pagenoteEle前后的节点
             let starter = node.cloneNode()
             let ender = node.cloneNode()
-            starter.nodeValue = nodeStr.substring(0, startIndex)
-            ender.nodeValue = nodeStr.substring(endIndex)
+            starter.nodeValue = node.nodeValue?.substring(0, startIndex)??''
+            ender.nodeValue = node.nodeValue?.substring(endIndex)??''
             //调整这三个节点的位置并移除原先的节点
             node.parentElement?.insertBefore(starter, node)
             node.parentElement?.insertBefore(pagenoteEle, node)
@@ -453,7 +459,7 @@ export class PagenoteGeneration {
 
 //非目标标签元素和目标标签元素，用于过滤标签
 const NonTargetedEle: string[] = ['SCRIPT', 'LINK', 'STYLE', 'PAGENOICON']
-const TargetedEle: string[] = []
+// const TargetedEle: string[] = []
 
 
 

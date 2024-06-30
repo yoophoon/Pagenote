@@ -24,7 +24,7 @@ import ReactDOM from 'react-dom/client'
 // by `offscreen.createDocument()` resolves.
 chrome.runtime.onMessage.addListener((message,sender,response)=>{
     console.log(message)
-    if(message.operation=='generateObjectURL'){
+    if(message.operation=='generateObjectURL' &&sender){
         console.log(message.fileURL)
     }
     getIMGData(message.fileURL,response)

@@ -1,6 +1,6 @@
 import TitleIcon from '@mui/icons-material/Title';
 import CloseIcon from '@mui/icons-material/Close';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton} from '@mui/material';
 import { SiteConfigContext } from '../ContentPagenotes';
 import { useContext } from 'react';
 

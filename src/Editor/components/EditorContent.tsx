@@ -1,8 +1,8 @@
 import { Paper, styled, useTheme } from "@mui/material";
-import { Root } from 'hast'
-import { Fragment, jsx, jsxs } from 'react/jsx-runtime'
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime'
-import { useContext, useEffect, useRef, useState, useTransition } from 'react'
+// import { Root } from 'hast'
+// import { Fragment, jsx, jsxs } from 'react/jsx-runtime'
+// import { toJsxRuntime } from 'hast-util-to-jsx-runtime'
+import { useContext, useEffect,useRef,useState } from 'react'
 import { EditorContext } from "..";
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -34,13 +34,12 @@ const MarkdownPresentation = styled('div')(({ theme }) => ({
     position: 'absolute',
     inset: 0,
     width: '100%',
-    height: 'fit-content',
+    height: '100%',
     margin:0,
-    marginTop:5,
     // minHeight: 700,
     lineHeight: 1.3,
     fontSize: theme.typography.fontSize,
-    overflow: 'hidden',
+    overflow: 'hidden auto',
     counterReset: 'lineRow',
     // '& *': {
     //     ...theme.typography.body2,
@@ -56,7 +55,7 @@ const MarkdownPresentation = styled('div')(({ theme }) => ({
         position: 'relative',
         margin:'0 !important',
         paddingLeft: 25,
-        width:'calc(100% - 26px)',
+        width:'100%',
     },
     '& > *::before': {
         counterIncrement: 'lineRow',
@@ -77,17 +76,19 @@ const MarkdownPresentation = styled('div')(({ theme }) => ({
 
 const UserTextArea = styled('textarea')(({ theme }) => ({
     ...theme.typography.body2,
+    boxSizing:'border-box',
     textAlign: 'left',
     // color: "#00000000",
-    width:'calc(100% - 26px)',
-    height: 'fit-content',
+    width:'100%',
+    height: '100%',
     position: 'absolute',
     inset: 0,
     // minHeight: 700,
     lineHeight: 1.3,
     margin:0,
-    marginTop:5,
     resize: 'none',
+    color:theme.palette.primary.main,
+    backgroundColor:'#00000000',
     // backgroundColor: '#00000000',
     fontFamily:'"Roboto","Helvetica","Arial",sans-serif',
     fontSize:16,
@@ -97,21 +98,31 @@ const UserTextArea = styled('textarea')(({ theme }) => ({
     border: 'none',
     outline: 'none',
     outlineOffset: 2,
-    overflow: 'hidden',
-    caretColor: theme.palette.text.primary,
+    overflow: 'hidden auto',
+    textOverflow:'ellipsis',
     whiteSpace:'break-spaces',
+    caretColor: theme.palette.text.primary,
 }));
 
 const EditorContentContainer = styled(Paper)(({ theme }) => ({
     fontSize: theme.typography.fontSize,
     position: 'relative',
-    width:'100%'
+    width:'100%',
+    margin:0,
+    marginTop:5,
+    // background:theme.palette.primary.contrastText
 }))
 
+type TEditorContent={
+    showTitleAndTools:{
+        showTitle:boolean,
+        showTools:boolean,
+    }
+}
 
 // react无法接管页面编辑的元素，采用其他函数操作编辑元素的hast
 // { children }: { children: React.ReactNode }
-export default function EditorContent() {
+export default function EditorContent({showTitleAndTools}:TEditorContent) {
     //获取初始值
     const editorContext = useContext(EditorContext)
     if(editorContext==null) return
@@ -124,10 +135,17 @@ export default function EditorContent() {
         selectionStart:0,
         selectionEnd:0,
         renderPort:chrome.runtime.connect({ name: 'renderport' }),
-        blurFocus:false,
+        //控制editorStatus.selectionStart、editorStatus.selectionEnd改变时是否聚焦于textArea
+        focusTextareaOnSelectionChange:false,
+        showHightlightMarkdown:true,
+        scrollTop:0,
+
     })
     const [highlightMarkdown,setHightlightMarkdown]=useState('')
     const theme=useTheme()
+    const markdownHighlight=useRef<HTMLDivElement | null>(null)
+    const plainText=useRef<HTMLTextAreaElement | null>(null)
+    const markupHighlight=useRef<HTMLDivElement | null>(null)
     // const [renderPort, setRenderPort] = useState<chrome.runtime.Port>()
 
     //在select事件中修改editorstatus的selectStart和selectEnd，方便其他组件获取数据
@@ -149,6 +167,9 @@ export default function EditorContent() {
     // }
 
     const handlerFocus=(e:React.FocusEvent<HTMLTextAreaElement, Element>)=>{
+        if(e){
+
+        }
         // e.preventDefault()
         // e.stopPropagation()
         // console.log('focus e',e)
@@ -161,7 +182,8 @@ export default function EditorContent() {
             ...vfile,
             color:'',
             "background-color":'',
-            blurFocus:false,
+            focusTextareaOnSelectionChange:false,
+            showHightlightMarkdown:false,
         }))
     }
 
@@ -195,9 +217,23 @@ export default function EditorContent() {
             "background-color":'#00000000',
             selectionEnd:e.target.selectionEnd,
             selectionStart:e.target.selectionStart,
-            blurFocus:false,
+            focusTextareaOnSelectionChange:false,
+            showHightlightMarkdown:true,
+            scrollTop:e.target.scrollTop,
         }))
         console.log('blur e',e)
+        console.log('vfile...',vfile)
+    }
+
+    const handlerScroll=(e:React.UIEvent<HTMLTextAreaElement, UIEvent>)=>{
+        console.log(e)
+        const target=e.target as typeof e.currentTarget
+        if(plainText.current){
+            plainText.current.scrollTop=target.scrollTop
+        }
+        if(markdownHighlight.current){
+            markdownHighlight.current.scrollTop=target.scrollTop
+        }
     }
 
     useEffect(()=>{
@@ -220,13 +256,15 @@ export default function EditorContent() {
             content:editorStatus.content,
             selectionEnd:editorStatus.selectEnd,
             selectionStart:editorStatus.selectStart,
-            blurFocus:true,
+            focusTextareaOnSelectionChange:true,
+            showHightlightMarkdown:true,
         }))
     },[editorStatus.content])
 
+    //控制vfile.selectionStart、vfile.selectionEnd改变时是否重新聚焦textArea
     useEffect(()=>{
         const editorContentEle = document.querySelector(`#${CSS.escape(editorStatus.contentID)}`) as HTMLTextAreaElement
-        if (editorContentEle && vfile.blurFocus) {
+        if (editorContentEle && vfile.focusTextareaOnSelectionChange) {
             editorContentEle.focus()
             editorContentEle.setSelectionRange(vfile.selectionStart,vfile.selectionEnd,'none')
         }
@@ -268,33 +306,44 @@ export default function EditorContent() {
     }, [])
 
     return (<EditorContentContainer
-    sx={{height:`calc(100% - ${editorStatus.showTitle?theme.pagenote.pagenoteEditor.title.height:0}px - ${editorStatus.showTools?theme.pagenote.pagenoteEditor.tools.height:0}px - 2px)`}}
+    sx={{height:`calc(100% - ${(editorStatus.showTitle||showTitleAndTools.showTitle)?theme.pagenote.pagenoteEditor.title.height:0}px - ${(editorStatus.showTools||showTitleAndTools.showTools)?theme.pagenote.pagenoteEditor.tools.height:0}px - 7px)`}}
     >
-        {!editorStatus.renderMarkdown?
-            <MarkdownPresentation className="draw"
+        {!editorStatus.renderMarkdown ?
+            vfile.showHightlightMarkdown && <MarkdownPresentation className="draw"
                 id="pagenoteEditorContent"
-                dangerouslySetInnerHTML={{ __html: highlightMarkdown }} /> :
-            <MarkdownPresentation 
-            className="draw markdown-body" 
-            id="pagenoteEditorContent"                >
+                ref={markdownHighlight}
+                dangerouslySetInnerHTML={{ __html: highlightMarkdown }}
+                sx={{
+                    scrollbarColor: vfile.showHightlightMarkdown ? `${theme.palette.text.primary} ${theme.palette.background.default}` : `#0000`,
+                    scrollbarWidth: vfile.showHightlightMarkdown ? `thin` : `none`,
+                }}
+            /> :
+            vfile.showHightlightMarkdown && <MarkdownPresentation
+                className="draw markdown-body"
+                id="pagenoteEditorContent"
+                ref={markupHighlight}                >
                 <MarkupRender markdown={editorStatus.content}></MarkupRender>
             </MarkdownPresentation>
         }
         <UserTextArea
             id={editorStatus.contentID}
+            ref={plainText}
             spellCheck="false"
             className="write"
             // rows={vfile.content.split('\n').length + 1}
             // value={editorStatus.content}
             value={vfile.content}
             style={{
-                color:vfile.color,
-                backgroundColor:vfile["background-color"],
-                display:editorStatus.renderMarkdown?"none":"block"
+                color:vfile.showHightlightMarkdown?"#0000":theme.palette.text.primary,
+                backgroundColor:"#0000",
+                display:editorStatus.renderMarkdown?"none":"block",
+                scrollbarColor:vfile.showHightlightMarkdown?`#0000`:`${theme.palette.text.primary} ${theme.palette.background.default}`,
+                scrollbarWidth:vfile.showHightlightMarkdown?`none`:`thin`,
             }}
             // onSelect={e=>handlerSelect(e)}
             onFocus={handlerFocus}
             onBlur={handlerBlur}
+            onScroll={e=>handlerScroll(e)}
             onChange={function (event) {
                     setVfile(vfile=>({
                         ...vfile,
@@ -397,123 +446,123 @@ const handleClick = (markdown: string) => {
  * @param ele 需要添加行号的目标hast树
  * @returns 返回转化后的hast树，每一行用p元素外套一层
  */
-function nodesInline(ele: Root): Root {
-    const newChildInline = []
-    for (let i = 0; i < ele.children.length; i++) {
-        let processedTextNodes: string[] = []
-        if (ele.children[i].type === 'text') {
-            processedTextNodes = processTextNode((ele.children[i] as HTMLInputElement).value)
-        }
-        //如果这个节点是元素节点，processedTextNodes则为空
-        if (processedTextNodes.length === 0) {
-            if (newChildInline.length === 0) {
-                newChildInline.push({
-                    type: 'element',
-                    tagName: 'p',
-                    children: [ele.children[i]]
-                })
-            } else {
-                //@ts-ignore
-                newChildInline
-                    .at(-1)
-                    //@ts-ignore
-                    .children.push(ele.children[i])
-            }
-            continue
-        }//如果这个节点是文本节点，且其中不存在换行符
-        else if (processedTextNodes.length === 1) {
-            if (newChildInline.length == 0) {
-                newChildInline.push({
-                    type: 'element',
-                    tagName: 'p',
-                    children: [ele.children[i]]
-                })
-            } else {
-                //@ts-ignore
-                newChildInline
-                    .at(-1)
-                    //@ts-ignore
-                    .children.push(ele.children[i])
-            }
-            continue
-        }//如果这个节点是文本节点，且存在换行符
-        else if (processedTextNodes.length > 1) {
-            // 处理当前节点
-            for (const [newline, processedTextNode] of processedTextNodes.entries()) {
-                //如果newChildInline里面没有数据，需要创建第一个数据
-                if (newChildInline.length == 0) {
-                    //如果第一个processedTextNode为空，那么创建一个空白p
-                    if (newline === 0 && processedTextNode === '') {
-                        //@ts-ignore
-                        newChildInline.push({
-                            type: 'element',
-                            tagName: 'p',
-                            children: [{
-                                type: 'text',
-                                value: ' '.replace(' ', '\u200B')
-                            }]
-                        })
-                        continue
-                    } //如果第一个processedTextNode为空，那么创建一个包含第一个processedTextNode的值的p
-                    else if (newline === 0 && processedTextNode !== '') {
-                        //@ts-ignore
-                        newChildInline.push({
-                            type: 'element',
-                            tagName: 'p',
-                            children: [{
-                                type: 'text',
-                                value: processedTextNode
-                            }]
-                        })
-                        continue
-                    }
-                }//newChildInline已经有值了，则将第一个processedTextNode的值添加到已有值得末尾
-                else if (newChildInline.length != 0 && newline == 0) {
-                    //@ts-ignore
-                    newChildInline
-                        .at(-1)
-                        //@ts-ignore
-                        .children.push({
-                            type: 'text',
-                            value: processedTextNode,
-                        })
-                    continue
-                } else if (newChildInline.length != 0 && newline > 0) {
-                    if (processedTextNode === '') {
-                        newChildInline.push({
-                            type: 'element',
-                            tagName: 'p',
-                            children: [{
-                                type: 'text',
-                                value: ' '.replace(' ', '\u200B')
-                            }]
-                        })
-                    } else {
-                        newChildInline.push({
-                            type: 'element',
-                            tagName: 'p',
-                            children: [{
-                                type: 'text',
-                                value: processedTextNode
-                            }]
-                        })
-                    }
-                }
-            }
-        }
-    }
-    return {
-        type: 'root',
-        //@ts-ignore
-        children: newChildInline
-    }
-}
+// function nodesInline(ele: Root): Root {
+//     const newChildInline = []
+//     for (let i = 0; i < ele.children.length; i++) {
+//         let processedTextNodes: string[] = []
+//         if (ele.children[i].type === 'text') {
+//             processedTextNodes = processTextNode((ele.children[i] as HTMLInputElement).value)
+//         }
+//         //如果这个节点是元素节点，processedTextNodes则为空
+//         if (processedTextNodes.length === 0) {
+//             if (newChildInline.length === 0) {
+//                 newChildInline.push({
+//                     type: 'element',
+//                     tagName: 'p',
+//                     children: [ele.children[i]]
+//                 })
+//             } else {
+//                 //@ts-ignore
+//                 newChildInline
+//                     .at(-1)
+//                     //@ts-ignore
+//                     .children.push(ele.children[i])
+//             }
+//             continue
+//         }//如果这个节点是文本节点，且其中不存在换行符
+//         else if (processedTextNodes.length === 1) {
+//             if (newChildInline.length == 0) {
+//                 newChildInline.push({
+//                     type: 'element',
+//                     tagName: 'p',
+//                     children: [ele.children[i]]
+//                 })
+//             } else {
+//                 //@ts-ignore
+//                 newChildInline
+//                     .at(-1)
+//                     //@ts-ignore
+//                     .children.push(ele.children[i])
+//             }
+//             continue
+//         }//如果这个节点是文本节点，且存在换行符
+//         else if (processedTextNodes.length > 1) {
+//             // 处理当前节点
+//             for (const [newline, processedTextNode] of processedTextNodes.entries()) {
+//                 //如果newChildInline里面没有数据，需要创建第一个数据
+//                 if (newChildInline.length == 0) {
+//                     //如果第一个processedTextNode为空，那么创建一个空白p
+//                     if (newline === 0 && processedTextNode === '') {
+//                         //@ts-ignore
+//                         newChildInline.push({
+//                             type: 'element',
+//                             tagName: 'p',
+//                             children: [{
+//                                 type: 'text',
+//                                 value: ' '.replace(' ', '\u200B')
+//                             }]
+//                         })
+//                         continue
+//                     } //如果第一个processedTextNode为空，那么创建一个包含第一个processedTextNode的值的p
+//                     else if (newline === 0 && processedTextNode !== '') {
+//                         //@ts-ignore
+//                         newChildInline.push({
+//                             type: 'element',
+//                             tagName: 'p',
+//                             children: [{
+//                                 type: 'text',
+//                                 value: processedTextNode
+//                             }]
+//                         })
+//                         continue
+//                     }
+//                 }//newChildInline已经有值了，则将第一个processedTextNode的值添加到已有值得末尾
+//                 else if (newChildInline.length != 0 && newline == 0) {
+//                     //@ts-ignore
+//                     newChildInline
+//                         .at(-1)
+//                         //@ts-ignore
+//                         .children.push({
+//                             type: 'text',
+//                             value: processedTextNode,
+//                         })
+//                     continue
+//                 } else if (newChildInline.length != 0 && newline > 0) {
+//                     if (processedTextNode === '') {
+//                         newChildInline.push({
+//                             type: 'element',
+//                             tagName: 'p',
+//                             children: [{
+//                                 type: 'text',
+//                                 value: ' '.replace(' ', '\u200B')
+//                             }]
+//                         })
+//                     } else {
+//                         newChildInline.push({
+//                             type: 'element',
+//                             tagName: 'p',
+//                             children: [{
+//                                 type: 'text',
+//                                 value: processedTextNode
+//                             }]
+//                         })
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     return {
+//         type: 'root',
+//         //@ts-ignore
+//         children: newChildInline
+//     }
+// }
 
-function processTextNode(text: string) {
-    const splitedText = text.split('\n')
-    const recordLine = []
-    for (const element of splitedText) {
-        recordLine.push(element)
-    }
-    return recordLine
-}
+// function processTextNode(text: string) {
+//     const splitedText = text.split('\n')
+//     const recordLine = []
+//     for (const element of splitedText) {
+//         recordLine.push(element)
+//     }
+//     return recordLine
+// }

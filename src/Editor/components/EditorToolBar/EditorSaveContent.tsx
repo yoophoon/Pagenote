@@ -1,7 +1,7 @@
 import { IconButton, SvgIcon, Tooltip, Zoom } from '@mui/material'
 import { Save } from '../../../assets/svg'
 import { useContext } from 'react'
-import { TPagenoteFragment } from '../../../pagenoteTypes'
+// import { TPagenoteFragment } from '../../../pagenoteTypes'
 import { EditorContext } from '../..'
 export default function editorSaveContent() {
     const editorContext = useContext(EditorContext)
@@ -23,17 +23,17 @@ export default function editorSaveContent() {
         </Tooltip>)
 }
 
-async function handleSaveContent(pagenoteUUID: number, pagenoteTitle: string, pagenoteContent: string, pagenoteFragment: TPagenoteFragment) {
+// async function handleSaveContent(pagenoteUUID: number, pagenoteTitle: string, pagenoteContent: string, pagenoteFragment: TPagenoteFragment) {
 
-    const response = await chrome.runtime.sendMessage({
-        operation: 'saveContent',
-        value: {
-            pagenoteUUID,
-            timestamp: new Date().getTime(),
-            pagenoteTitle,
-            pagenoteContent,
-            pagenoteFragment
-        }
-    })
-    console.log(response)
-}
+//     const response = await chrome.runtime.sendMessage({
+//         operation: 'saveContent',
+//         value: {
+//             pagenoteUUID,
+//             timestamp: new Date().getTime(),
+//             pagenoteTitle,
+//             pagenoteContent,
+//             pagenoteFragment
+//         }
+//     })
+//     console.log(response)
+// }

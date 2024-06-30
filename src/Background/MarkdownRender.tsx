@@ -1,4 +1,4 @@
-import { renderToStaticMarkup, renderToString } from 'react-dom/server';
+import {  renderToString } from 'react-dom/server';
 import { Markdown } from '../lib/react-markdown-editor';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';

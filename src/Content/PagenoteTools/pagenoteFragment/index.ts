@@ -1,7 +1,7 @@
 //import { PagenoteFragmentPresentation } from "./pagenoteFragmentPresentation";
 // import { generateFragment } from "./pagenoteFragmentGeneration"
 
-import { EOperation, EPosition, TMessageToEditor, TPagenote, TPagenoteFragment, TPagenoteNodes } from "../../../pagenoteTypes"
+import {  EPosition,  TPagenote, TPagenoteFragment } from "../../../pagenoteTypes"
 import { PagenoteGeneration } from "./pagenoteGeneration"
 
 
@@ -68,7 +68,7 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
     //添加笔记
     const contentPagenote: TPagenote = {
 
-        editorPosition: pagenotePosition,
+        editorPosition: pagenotePosition.position,
         pagenoteID,
         pagenoteIndex: pagenoteNodes.startIndex,
         pagenoteTitle: pagenoteFragment.textStart,
@@ -81,6 +81,9 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
         showEditorTitle:true,
         showEditorTools:true,
         renderMarkdown:false,
+        editorContentScrollTop:0,
+        editorWidth:pagenotePosition.position==EPosition.afterPagenoteFragment?`${pagenotePosition.width}px`:"300px",
+        editorHeight:"200px",
     }
 
     return { pagenoteEles, contentPagenote }
@@ -116,9 +119,15 @@ function getPagenotePosition(pagenoteEles: HTMLElement[]) {
     const parentElementWidth = parentElement.getBoundingClientRect().width
     console.log(parentElementWidth)
     if (parentElementWidth >= minWidthAfterPagenoteFragment) {
-        return EPosition.afterPagenoteFragment
+        return {
+            width:parentElementWidth,
+            position:EPosition.afterPagenoteFragment
+        }
     }
-    return EPosition.followPagenoteFragment
+    return {
+        width:parentElementWidth,
+        position:EPosition.followPagenoteFragment
+    }
 }
 
 export function getPagenoteFragmentEleAnchor(pagenoteFragment:TPagenoteFragment){
