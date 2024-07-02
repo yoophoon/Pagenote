@@ -1,20 +1,22 @@
-    import { Box, Divider } from "@mui/material";
+    import { Box, Divider, styled } from "@mui/material";
 import EditorTitle from "./components/EditorTitle";
 import EditorToolBar from "./components/EditorToolBar";
 import EditorContent from "./components/EditorContent";
 // import zIndex from "@mui/material/styles/zIndex";
 import { EditorContext } from ".";
 import { useContext, useEffect, useRef, useState } from "react";
-const style = {
-    boxShadow: 24,
-    p: 2,
-    'resize':"vertical",
+
+
+  const EditorAfterPagenoteFragmentContainer=styled(Box)(({theme})=>({
+    boxShadow: theme.shadows[1],
+    
+    resize:'vertical',
     overflow:'auto',
     minWidth:'100%',
     minHeight:'200px',
     height:'200px',
     zIndex:999,
-  };
+}))
 
 export default function EditorAfterPagenoteFragment() {
   const editorContext = useContext(EditorContext)
@@ -25,6 +27,7 @@ export default function EditorAfterPagenoteFragment() {
     showTools:editorStatus.showTools,
   })
   
+  const pagenoteEditorRef=useRef<HTMLDivElement>()
   useEffect(()=>{
     setShowTitleTools(setting=>({
       ...setting,
@@ -51,24 +54,28 @@ export default function EditorAfterPagenoteFragment() {
     console.log('resize...',e)
     console.log(editorStatus)
     const target=e.target as typeof e.currentTarget
-    setEditorStatus(editorStatus=>({
-      ...editorStatus,
-      editorHeight:target.style.height,
-    }))
+    if(target==pagenoteEditorRef.current){
+      setEditorStatus(editorStatus=>({
+        ...editorStatus,
+        editorHeight:target.scrollHeight+'px',
+      }))
+    }
+    
   }
 
-  return (<Box
+  return (<EditorAfterPagenoteFragmentContainer
     sx={{
-      ...style,
       boxSizing:'border-box',
       // width:editorStatus.editorWidth,
       // maxWidth:editorStatus.editorWidth,
       height:editorStatus.editorHeight,
       float:'left',
+      p: 2,
     }}
     bgcolor={"background.default"}
     color={'text.primary'}
     id='pagenoteEditor'
+    ref={pagenoteEditorRef}
     onMouseEnter={handlerMouseEnter}
     onMouseLeave={handlerMouseLeave}
     onMouseUp={e=>handlerMouseUp(e)}
@@ -85,5 +92,5 @@ export default function EditorAfterPagenoteFragment() {
       <Divider aria-hidden="false" />
     </>}
     <EditorContent showTitleAndTools={showTitleAndTools}/>
-  </Box>)
+  </EditorAfterPagenoteFragmentContainer>)
 }

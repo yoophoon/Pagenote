@@ -18,7 +18,7 @@ export function ShowSiteNotes() {
                 //sidePanel.open有bug，链接给了一些解决方案
                 //https://stackoverflow.com/questions/77213045/error-sidepanel-open-may-only-be-called-in-response-to-a-user-gesture-re
                 chrome.sidePanel.open({ tabId: tab.id });
-                SidepanelPath += '?currentTabURL=' + tab.url
+                // SidepanelPath += '?currentTabURL=' + tab.url
                 chrome.sidePanel.setOptions({ path: SidepanelPath, enabled: true });
             }
         })

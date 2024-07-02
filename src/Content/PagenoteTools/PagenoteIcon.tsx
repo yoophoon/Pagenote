@@ -1,6 +1,6 @@
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Box, ButtonGroup, ClickAwayListener, styled } from '@mui/material';
-import { Fragment, createContext, memo, useEffect, useMemo, useState } from 'react';
+import { Fragment, createContext, memo, useEffect, useMemo, useRef, useState } from 'react';
 import { EOperation, EPosition, TPagenote, TPagenoteStyle,  TSetContentPagenotes } from "../../pagenoteTypes"
 import ToolsSetFontColor from './PagenoteToolsButton/ToolsSetFontColor';
 import ToolsSetBackgroundColor from './PagenoteToolsButton/ToolsSetBackgroundColor';
@@ -13,6 +13,7 @@ import ToolsSetPagenote from './PagenoteToolsButton/ToolsSetPagenote';
 import ToolsDelete from './PagenoteToolsButton/ToolsDelete';
 import Editor from '../../Editor'
 import { createPortal } from 'react-dom';
+import { getClosestBlock } from '../../lib/DOMOperation';
 
 type TPagenoteIcon = {
   contentPagenote: TPagenote,
@@ -66,9 +67,10 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
     //包含当前pagenoteFragment.textStart文本的一系列节点
     const pagenoteAnchors = Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${props.contentPagenote.pagenoteID}"]`))
     //pagenoteAnchors节点后面跟随的图标，用于响应后续弹出pagenoteTools
-    const pagenoteIcon = document.querySelector(`pagenoteicon[pagenoteid="${props.contentPagenote.pagenoteID}"]`)
+    const pagenoteIcon = document.querySelector(`pagenoteicon[pagenoteid="${props.contentPagenote.pagenoteID}"]`) as HTMLElement
     //最后一个节点的宽高信息，主要使用rectInfo.height设置pagenoteTools的位置
     const rectInfo = pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect()
+    pagenoteIcon.style.paddingLeft=rectInfo.height+'px'
     setContentPagenote(contentPagenote => {
       return ({
         ...contentPagenote,
@@ -118,6 +120,29 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
     }))
   }, [props.contentPagenote])
 
+  const closestBlockProperty=useRef<{computedOverflow?:string,styleOverflow:string}>({styleOverflow:''})
+  //检测是否需要将最近块级父元素overflow设置为hidden
+  useEffect(()=>{
+    const currentEle=document.querySelector(`pagenoteicon[pagenoteid="${contentPagenote.pagenoteID}"]`)
+    const closestBlock=currentEle&&getClosestBlock(currentEle)
+    if(tool=='setPagenote' && contentPagenote.editorPosition==EPosition.afterPagenoteFragment){
+      if(closestBlock){
+        closestBlockProperty.current.styleOverflow=closestBlock.style.overflow
+        closestBlockProperty.current.computedOverflow=window.getComputedStyle(closestBlock).overflow
+        if(closestBlockProperty.current.computedOverflow=='visible'){
+          closestBlock.style.overflow='auto'
+        }
+        console.log('closestBlockProperty.current...',closestBlockProperty.current)
+      }
+    }
+    if(tool=='' && contentPagenote.editorPosition==EPosition.afterPagenoteFragment){
+      if(closestBlock&&closestBlockProperty.current.computedOverflow!=closestBlock.style.overflow){
+        closestBlockProperty.current.styleOverflow==''?
+        closestBlock.style.removeProperty('overflow'):
+        closestBlock.style.overflow=closestBlockProperty.current.styleOverflow
+      }
+    }
+  },[tool])
 
   //检测更新pagenoteAnchor和pagenoteIcon的样式
   useEffect(() => {
@@ -200,7 +225,9 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
                 sx={{
                   width: pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().height,
                   height: pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().height,
-                  verticalAlign: 'bottom',
+                  position:'absolute',
+                  top:0,
+                  left:0,
                 }}>
               </DescriptionIcon>,
                 pagenoteIcon)

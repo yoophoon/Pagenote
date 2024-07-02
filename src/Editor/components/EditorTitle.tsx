@@ -41,7 +41,7 @@ export default function EditorTitle() {
 
     return (< Typography
         id={editorStatus.titleID}
-        variant="h6"
+        variant='pagenoteH6'
         component="h4"
         textAlign={'center'}
         bgcolor={"background.default"}
@@ -51,13 +51,7 @@ export default function EditorTitle() {
         onDoubleClick={e=>handlerDoubleClick(e)}
         onBlur={e=>handlerBlur(e)}
         sx={{
-            background:'none',
-            width:'100%',
-            height:theme.pagenote.pagenoteEditor.title.height,
-            float:'none',
-            textOverflow:'ellipsis',
-            overflow:'hidden',
-            whiteSpace:'nowrap',
+            color:`${theme.palette.primary.main} !important`
         }}
     >
         {editorStatus.title}

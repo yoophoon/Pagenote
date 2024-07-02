@@ -2,7 +2,7 @@ import { common, createStarryNight } from '@wooorm/starry-night'
 import { toHtml } from 'hast-util-to-html'
 import { EOperation, ERenderTarget, TPagenote } from '../pagenoteTypes'
 import { nodesInline } from './lib'
-import pagenoteDB from './storeage/pagenoteDB'
+import pagenoteDB from '../lib/storeage/pagenoteDB'
 // import markupRender, { getStaticMarkUp } from './MarkdownRender'
 // import markupRender from './MarkdownRender'
 

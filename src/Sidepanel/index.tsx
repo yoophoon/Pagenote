@@ -1,8 +1,6 @@
 // import React from 'react'
-// import ReactDOM from 'react-dom/client'
 // import {Markdown} from '../lib/react-markdown-editor'
 // import remarkGfm from 'remark-gfm'
-import { EOperation } from '../pagenoteTypes'
 // import { renderToStaticMarkup } from 'react-dom/server';
 // function PagenoteList() {
 //     const searchParams = new URLSearchParams(window.location.search)
@@ -23,12 +21,20 @@ import { EOperation } from '../pagenoteTypes'
 // )
 
 
-chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
-    if(message.operation==EOperation.sidePanel&&sender){
-        console.log(message.value)
-    }
-    sendResponse({value:"roger fuck u"})
-})
+// chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
+//     if(message.operation==EOperation.sidePanel&&sender){
+//         console.log(message.value)
+//     }
+//     sendResponse({value:"roger fuck u"})
+// })
 
-const pnChannel=new BroadcastChannel('pagenoteChannel')
-pnChannel.postMessage('hi there')
+// const pnChannel=new BroadcastChannel('pagenoteChannel')
+// pnChannel.postMessage('hi there')
+
+import ReactDOM from 'react-dom/client'
+import SidePanel from './SidePanel'
+
+const sidePanelRootEle=document.querySelector('#root') as HTMLElement
+const sidePanelRoot=ReactDOM.createRoot(sidePanelRootEle)
+sidePanelRoot.render(<SidePanel></SidePanel>)
+

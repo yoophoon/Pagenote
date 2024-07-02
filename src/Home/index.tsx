@@ -7,22 +7,12 @@ import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 
 
-function PagenoteList() {
 
-    return <p>hello pagenote home</p>
-}
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <PagenoteList />
-        <Header />
+ReactDOM.createRoot(document.getElementById('root')!).render(<Home />)
 
-    </React.StrictMode>,
-)
 
-function Header() {
-    return <header className='header'>
-
-    </header>
+function Home() {
+  return <div>hello world</div>
 }
 

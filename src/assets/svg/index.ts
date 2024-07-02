@@ -11,6 +11,7 @@ export { default as Link } from "./Link";
 export { default as Markdown } from "./Markdown";
 export { default as Markup } from "./Markup";
 export { default as MaterialUi } from "./MaterialUi";
+export { default as Note } from "./Note";
 export { default as Orderlist } from "./Orderlist";
 export { default as React } from "./React";
 export { default as Reference } from "./Reference";

@@ -154,31 +154,3 @@ export type TSiteConfig={
 export type TSetSiteConfig=React.Dispatch<React.SetStateAction<TSiteConfig>>
 
 
-
-declare module '@mui/material/styles' {
-    interface Theme {
-      pagenote: {
-        pagenoteEditor:{
-          title:{
-            height:number
-          },
-          tools:{
-            height:number
-          }
-        }
-      };
-    }
-    // allow configuration using `createTheme`
-    interface ThemeOptions {
-      pagenote?: {
-        pagenoteEditor:{
-          title:{
-            height:number
-          },
-          tools:{
-            height:number
-          }
-        }
-      };
-    }
-  }

@@ -6,8 +6,8 @@ import PagenoteIcon from "./PagenoteTools/PagenoteIcon"
 import RegistMessageListener from "./RegistMessageListener"
 import SiteConfig from "./SiteConfig/index"
 import {  ScopedCssBaseline, createTheme } from "@mui/material"
-
-
+import { pagenoteTheme } from "../Theme"
+import { getThemeMode } from "../lib/common"
 
 
 type TSiteConfigContext={
@@ -33,22 +33,12 @@ export default function ContentPagenotes()
     })
     const previoutSiteCOnfig=useRef(siteConfig)
 
-    const pagenoteTheme = createTheme({
-      palette: {
-        mode: getThemeMode(siteConfig.siteTheme)
-      },
-      pagenote: {
-        pagenoteEditor: {
-          title: {
-            height: 32
-          },
-          tools: {
-            height: 36
-          }
-        }
-      }
-    })
-    console.log('pagenoteTheme...',pagenoteTheme)
+  const theme = createTheme({
+    palette: {
+      mode: getThemeMode(siteConfig.siteTheme)
+    },
+  },pagenoteTheme)
+    console.log('pagenoteTheme...',theme)
 
 
     useEffect(() => {
@@ -120,8 +110,8 @@ export default function ContentPagenotes()
 
     console.log(pagenotesInfo)
   return (
-      <ThemeProvider theme={pagenoteTheme}>
-        <ScopedCssBaseline>
+      <ThemeProvider theme={theme}>
+        <ScopedCssBaseline sx={{width:0,height:0}}>
           {pagenotesInfo.map((pagenoteInfo) => {
             if (pagenoteInfo && pagenoteInfo.pagenoteIcon) {
               return (
@@ -170,9 +160,10 @@ function initPagenotes(setPagenoteIcons: React.Dispatch<React.SetStateAction<TCo
                 const pagenoteEles = getPagenoteFragmentEleAnchor(contentPagenote.pagenoteFragment)
                 if (pagenoteEles == undefined) return
                 pagenoteEles.forEach(pagenoteEle => pagenoteEle.setAttribute('pagenoteid', contentPagenote.pagenoteID.toString()))
-
                 const pagenoteIcon = document.createElement('pagenoteIcon')
                 pagenoteIcon.setAttribute('pagenoteid', contentPagenote.pagenoteID.toString())
+                pagenoteIcon.style.position='relative'
+                // pagenoteIcon.innerHTML='&emsp;'
                 pagenoteIcon.draggable = false
                 pagenoteIcon.onclick = e => {
                     // e.stopPropagation();
@@ -241,6 +232,8 @@ function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
     pagenoteEles.forEach(pagenoteEle=>pagenoteEle.setAttribute('pagenoteid',contentPagenote.pagenoteID.toString()))
     const pagenoteIcon=document.createElement('pagenoteIcon')
     pagenoteIcon.setAttribute('pagenoteid',contentPagenote.pagenoteID.toString())
+    pagenoteIcon.style.position='relative'
+    // pagenoteIcon.innerHTML='&emsp;'
     pagenoteIcon.draggable=false
     pagenoteIcon.onclick=e=>{
         // e.stopPropagation();
@@ -300,13 +293,3 @@ function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
 //     return PagenoteEditor
 // }
 
-function getThemeMode(mode:ESiteTheme){
-  if(mode==ESiteTheme.dark){
-    return 'dark'
-  }else if(mode==ESiteTheme.light){
-    return 'light'
-  }else if(mode==ESiteTheme.systemDefault){
-    const themeMode=matchMedia('(prefers-color-scheme:dark)')
-    return themeMode.matches?'dark':'light'
-  }
-}
