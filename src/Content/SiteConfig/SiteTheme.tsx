@@ -1,8 +1,9 @@
-import ContrastIcon from '@mui/icons-material/Contrast';
+
 import { IconButton} from '@mui/material';
 import { memo, useContext } from 'react';
 import { SiteConfigContext } from '../ContentPagenotes';
 import { ESiteTheme } from '../../pagenoteTypes';
+import ContrastIcon from '@mui/icons-material/Contrast';
 import NightlightIcon from '@mui/icons-material/Nightlight';
 import LightModeIcon from '@mui/icons-material/LightMode';
 

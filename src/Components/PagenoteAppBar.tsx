@@ -56,7 +56,7 @@ function PagenoteAppBar(props:TPagenoteAppBar) {
   />)
 
   return (
-    <AppBar position="absolute" sx={{top:0}}>
+    <AppBar position='sticky' sx={{top:0}}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           

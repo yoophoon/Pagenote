@@ -153,4 +153,15 @@ export type TSiteConfig={
 
 export type TSetSiteConfig=React.Dispatch<React.SetStateAction<TSiteConfig>>
 
+export enum ESection{
+    extension,
+    page,
+    sidepanel,
+    markdown,
+    backup,
+}
 
+
+export type TExtensionConfig={
+    extensionTheme:ESiteTheme,
+}

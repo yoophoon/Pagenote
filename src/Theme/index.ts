@@ -31,6 +31,7 @@ declare module '@mui/material/styles' {
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
     pagenoteH6: true;
+    pagenoteSubtitle:true;
   }
 }
 
@@ -49,29 +50,49 @@ export const pagenoteTheme:ThemeOptions = {
         }
       }
     },
-    MuiTypography:{
-      variants:[{
-        props:{variant:'pagenoteH6'},
-        style: {
-          fontFamily: "\"Roboto\", \"Helvetica\", \"Arial\", sans-serif",
-          fontSize: "1.25rem",
-          fontWeight: 500,
-          letterSpacing: "0.0075em",
-          lineHeight: `${pagenoteEditor.titleHeight}px !important`,
-          background: 'none',
-          display:'block !important',
-          width: '100%',
-          height: `${pagenoteEditor.titleHeight}px !important`,
-          float: 'none',
-          textOverflow: 'ellipsis',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          margin: '0 !important'
-        }
-      }]
+    MuiTypography: {
+      variants: [
+        {
+          props: { variant: 'pagenoteH6' },
+          style: {
+            fontFamily: "\"Roboto\", \"Helvetica\", \"Arial\", sans-serif",
+            fontSize: "1.25rem",
+            fontWeight: 500,
+            letterSpacing: "0.0075em",
+            lineHeight: `${pagenoteEditor.titleHeight}px !important`,
+            background: 'none',
+            display: 'block !important',
+            width: '100%',
+            height: `${pagenoteEditor.titleHeight}px !important`,
+            float: 'none',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            margin: '0 !important'
+          }
+        }, {
+          props: { variant: 'pagenoteSubtitle' },
+          style: {
+            fontFamily: "\"Roboto\", \"Helvetica\", \"Arial\", sans-serif",
+            fontSize: "1.25rem",
+            fontWeight: 500,
+            letterSpacing: "0.0075em",
+            lineHeight: '2rem',
+            background: 'none',
+            display: 'block !important',
+            width: 'calc(100% - 4rem)',
+            height: `${pagenoteEditor.titleHeight}px !important`,
+            float: 'none',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            margin: '2rem',
+            borderBottom: '2px solid'
+          }
+        },
+      ]
     }
   },
-  
   pagenote: {
     pagenoteEditor: {
       title: {
