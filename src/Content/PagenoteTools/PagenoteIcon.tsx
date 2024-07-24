@@ -65,30 +65,14 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
   //方便后续更新pagenoteAnchor的样式            考虑到这个组件会频繁的更新所以这里采用useMemo()存储获取的信息
   const [pagenoteAnchors, pagenoteIcon] = useMemo(() => {
     //包含当前pagenoteFragment.textStart文本的一系列节点
-    const pagenoteAnchors = Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${props.contentPagenote.pagenoteID}"]`))
+    const pagenoteAnchors = Array.from(document.querySelectorAll(`pagenoteanchor[data-pagenoteid="${props.contentPagenote.pagenoteID}"]`))
     //pagenoteAnchors节点后面跟随的图标，用于响应后续弹出pagenoteTools
-    const pagenoteIcon = document.querySelector(`pagenoteicon[pagenoteid="${props.contentPagenote.pagenoteID}"]`) as HTMLElement
+    const pagenoteIcon = document.querySelector(`pagenoteicon[data-pagenoteid="${props.contentPagenote.pagenoteID}"]`) as HTMLElement
     //最后一个节点的宽高信息，主要使用rectInfo.height设置pagenoteTools的位置
-    const rectInfo = pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect()
-    pagenoteIcon.style.paddingLeft=rectInfo.height+'px'
-    setContentPagenote(contentPagenote => {
-      return ({
-        ...contentPagenote,
-        anchorPositionX: getToolsSuitablePositionX(window.scrollX + rectInfo.left + rectInfo.width, 272),
-        anchorPositionY: window.scrollY + rectInfo.top + rectInfo.height,
-      })
-    })
-      
-    
-
-    return [pagenoteAnchors, pagenoteIcon]
-  },[])
-
-  // const [rectInfo,setRectInfo]=useState(pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect())
-
-  useEffect(()=>{
-    const resetToolsPosition=()=>{
+    if(pagenoteAnchors.length>=1){
+      console.log(pagenoteAnchors)
       const rectInfo = pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect()
+      pagenoteIcon.style.paddingLeft=rectInfo.height+'px'
       setContentPagenote(contentPagenote => {
         return ({
           ...contentPagenote,
@@ -97,6 +81,23 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
         })
       })
     }
+    console.log('pagenote信息',contentPagenote,pagenoteIcon)
+    return [pagenoteAnchors, pagenoteIcon]
+  },[])
+
+  // const [rectInfo,setRectInfo]=useState(pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect())
+
+  useEffect(()=>{
+    const resetToolsPosition=contentPagenote.pagenoteIndex>=0?()=>{
+      const rectInfo = pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect()
+      setContentPagenote(contentPagenote => {
+        return ({
+          ...contentPagenote,
+          anchorPositionX: getToolsSuitablePositionX(window.scrollX + rectInfo.left + rectInfo.width, 272),
+          anchorPositionY: window.scrollY + rectInfo.top + rectInfo.height,
+        })
+      })
+    }:()=>{}
 
     // resetToolsPosition()
     window.addEventListener('resize',resetToolsPosition)
@@ -123,7 +124,7 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
   const closestBlockProperty=useRef<{computedOverflow?:string,styleOverflow:string}>({styleOverflow:''})
   //检测是否需要将最近块级父元素overflow设置为hidden
   useEffect(()=>{
-    const currentEle=document.querySelector(`pagenoteicon[pagenoteid="${contentPagenote.pagenoteID}"]`)
+    const currentEle=document.querySelector(`pagenoteicon[data-pagenoteid="${contentPagenote.pagenoteID}"]`)
     const closestBlock=currentEle&&getClosestBlock(currentEle)
     if(tool=='setPagenote' && contentPagenote.editorPosition==EPosition.afterPagenoteFragment){
       if(closestBlock){
@@ -155,7 +156,7 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
     event.stopPropagation()
     console.log('tools icon click')
     // setSaveContentPagenote(true)
-    setContentPagenote(contentPagenote => ({ 
+    contentPagenote.pagenoteIndex>=0&&setContentPagenote(contentPagenote => ({ 
       ...contentPagenote, 
       showTools: true, 
       anchorPositionX:getToolsSuitablePositionX(window.scrollX+pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().left+pagenoteAnchors[pagenoteAnchors.length - 1].getBoundingClientRect().width,272),
@@ -219,7 +220,7 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
         tool != 'setPagenote'&&contentPagenote.showEditor==false ?
           <Fragment>
             {
-              pagenoteIcon &&
+              pagenoteIcon&&
               createPortal(<DescriptionIcon
                 onClick={e => handlerIconClick(e)}
                 sx={{
@@ -289,7 +290,7 @@ export default PagenoteIcon
  */
 function setEleStyle(pagenoteIcon: HTMLElement, targetEles: HTMLElement[], style: TPagenoteStyle | undefined) {
   //如果样式未定义则直接返回
-  if (style == undefined) return
+  if (style == undefined || pagenoteIcon==undefined) return
   //pagenoteIcon仅设置字体颜色和背景颜色
   pagenoteIcon.style['color'] = style['color'] ?? ''
   pagenoteIcon.style['backgroundColor'] = style['backgroundColor'] ?? ''

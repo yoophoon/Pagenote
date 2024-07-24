@@ -1,13 +1,12 @@
-import { createContext, useEffect, useRef, useState } from "react"
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react"
 // import { createPortal } from "react-dom"
 // import { PagenoteGeneration } from "./PagenoteTools/pagenoteFragment/pagenoteGeneration"
-import { TPagenote, EOperation, TContentPagenote, TSetContentPagenotes, TSiteConfig, ESiteTheme} from "../pagenoteTypes"
+import { TPagenote, EOperation, TContentPagenote, TSetContentPagenotes, TSiteConfig, ESiteTheme, EHighlightStyle} from "../pagenoteTypes"
 import PagenoteIcon from "./PagenoteTools/PagenoteIcon"
 import RegistMessageListener from "./RegistMessageListener"
 import SiteConfig from "./SiteConfig/index"
 import {  ScopedCssBaseline, createTheme } from "@mui/material"
 import { pagenoteTheme } from "../Theme"
-import { getThemeMode } from "../lib/common"
 
 
 type TSiteConfigContext={
@@ -24,51 +23,67 @@ export default function ContentPagenotes()
     const [pagenotesInfo, setPagenotesInfo] = useState<TContentPagenote[]>([])
     const [siteConfig, setSiteConfig]=useState<TSiteConfig>({
         origin:window.location.origin+window.location.pathname,
+        title:document.querySelector('title')?.innerHTML??'',
         siteTheme:ESiteTheme.dark,
         showPagenote:false,
         showPositionBar:false,
         showEditorTitle:true,
         showEditorTools:true,
         onThisSite:true,
+        shortcutsOn:true,
+        shortcuts:[],
+        highLightStyle:EHighlightStyle.bg,
+        openSidepanel:false,
     })
     const previoutSiteCOnfig=useRef(siteConfig)
+    const [siteThemeMode,setSiteThemeMode]=useState<'dark'|'light'>('dark')
 
   const theme = createTheme({
     palette: {
-      mode: getThemeMode(siteConfig.siteTheme)
+      mode: siteThemeMode
     },
   },pagenoteTheme)
     console.log('pagenoteTheme...',theme)
 
 
-    useEffect(() => {
-        //处理页面第一次加载，从后台获取数据
-        initPagenotes(setPagenotesInfo)
-        RegistMessageListener(setPagenotesInfo)
-        //处理页面选中事件
-        document.body.onmouseup=(e)=>{
-            console.log(e)
-            if(e.button==0&&siteConfig.onThisSite){
-                e.preventDefault()
-                e.stopPropagation()
-                handlerContentMouseup(setPagenotesInfo)
-            }
-        }
+  useEffect(() => {
+    //处理页面第一次加载，从后台获取数据
+    initPagenotes(setPagenotesInfo)
+    RegistMessageListener(setPagenotesInfo)
+    //处理页面选中事件
+    document.body.onmouseup = (e) => {
+      console.log(e)
+      if (e.button == 0 && siteConfig.onThisSite) {
+        e.preventDefault()
+        e.stopPropagation()
+        handlerContentMouseup(setPagenotesInfo)
+      }
+    }
 
-        //请求页面配置
-        chrome.runtime.sendMessage({
-            operation: EOperation.getSiteConfig,
-            value: {
-                origin: window.location.origin + window.location.pathname
-            }
-        },response=>{
-            console.log('EOperation.getSiteConfig...',response)
-            if(response){
-                setSiteConfig(response)
-            }
-        })
+    //请求页面配置
+    chrome.runtime.sendMessage({
+      operation: EOperation.getSiteConfig,
+      value: {
+        origin: window.location.origin + window.location.pathname,
+        title:document.querySelector('title')?.innerHTML??'',
+      }
+    }, response => {
+      console.log('EOperation.getSiteConfig...', response)
+      if (response) {
+        setSiteConfig(response)
+      }
+    })
+
+  }, [])
+
+    const themeMode=useMemo(()=>(matchMedia('(prefers-color-scheme:dark)')),[])
+    // const themeMode = matchMedia('(prefers-color-scheme:dark)')
+    const setSystemDefaultTheme=useCallback(()=>{
+      themeMode.matches?
+      setSiteThemeMode('dark')
+      :
+      setSiteThemeMode('light')
     },[])
-
     /**
      * 更新siteConfig的相关功能设置
      */
@@ -81,12 +96,17 @@ export default function ContentPagenotes()
                 if(e.button==0&&siteConfig.onThisSite){
                     e.preventDefault()
                     e.stopPropagation()
-                    handlerContentMouseup(setPagenotesInfo)
+                    
+                    if(e.target instanceof HTMLElement && !e.target.getAttribute('data-pagenoteid')){
+                      handlerContentMouseup(setPagenotesInfo)
+                    }
                 }
             }
         }
 
-        //监听siteConfig.showEditorTitle和siteConfig.showEditorTools,设置editor是否显示标题和工具栏
+      
+
+      //监听siteConfig.showEditorTitle和siteConfig.showEditorTools,设置editor是否显示标题和工具栏
       if (siteConfig.showEditorTitle != previoutSiteCOnfig.current.showEditorTitle ||
         siteConfig.showEditorTools != previoutSiteCOnfig.current.showEditorTools) {
         setPagenotesInfo(pagenotesInfo => {
@@ -105,6 +125,15 @@ export default function ContentPagenotes()
           })
         })
       }
+      
+      if(siteConfig.siteTheme==ESiteTheme.systemDefault){
+        setSystemDefaultTheme()
+        themeMode.addEventListener("change",setSystemDefaultTheme)
+      }else {
+        siteConfig.siteTheme==ESiteTheme.dark&&setSiteThemeMode('dark')
+        siteConfig.siteTheme==ESiteTheme.light&&setSiteThemeMode('light')
+        themeMode.removeEventListener('change',setSystemDefaultTheme)
+      }
       previoutSiteCOnfig.current=siteConfig
     },[siteConfig])
 
@@ -113,7 +142,9 @@ export default function ContentPagenotes()
       <ThemeProvider theme={theme}>
         <ScopedCssBaseline sx={{width:0,height:0}}>
           {pagenotesInfo.map((pagenoteInfo) => {
-            if (pagenoteInfo && pagenoteInfo.pagenoteIcon) {
+            if (pagenoteInfo 
+              //&& pagenoteInfo.pagenoteIcon
+            ) {
               return (
                 <PagenoteIcon
                   key={pagenoteInfo.contentPagenote.pagenoteID}
@@ -122,6 +153,10 @@ export default function ContentPagenotes()
                 />
               )
             }
+            // else if(pagenoteInfo&&!pagenoteInfo.pagenoteIcon){
+            //   console.log('pagenoteIcon 不存在',pagenoteInfo)
+            //   return
+            // }
           })}
           {/* {console.log(pagenotesInfo.map((pagenoteInfo) => {
             if (pagenoteInfo && pagenoteInfo.pagenoteIcon) {
@@ -158,10 +193,17 @@ function initPagenotes(setPagenoteIcons: React.Dispatch<React.SetStateAction<TCo
         setPagenoteIcons(response.map(function (contentPagenote: TPagenote): TContentPagenote {
             if (contentPagenote.pagenoteFragment) {
                 const pagenoteEles = getPagenoteFragmentEleAnchor(contentPagenote.pagenoteFragment)
-                if (pagenoteEles == undefined) return
-                pagenoteEles.forEach(pagenoteEle => pagenoteEle.setAttribute('pagenoteid', contentPagenote.pagenoteID.toString()))
+                if (pagenoteEles == undefined) {
+                  console.log('missAnchor...',contentPagenote)
+                  chrome.runtime.sendMessage({operation:EOperation.missAnchor,value:{
+                    origin:contentPagenote.pagenoteTarget,
+                    pagenoteID:contentPagenote.pagenoteID,
+                  }})
+                  return {contentPagenote}
+                }
+                pagenoteEles.forEach(pagenoteEle => pagenoteEle.setAttribute('data-pagenoteid', contentPagenote.pagenoteID.toString()))
                 const pagenoteIcon = document.createElement('pagenoteIcon')
-                pagenoteIcon.setAttribute('pagenoteid', contentPagenote.pagenoteID.toString())
+                pagenoteIcon.setAttribute('data-pagenoteid', contentPagenote.pagenoteID.toString())
                 pagenoteIcon.style.position='relative'
                 // pagenoteIcon.innerHTML='&emsp;'
                 pagenoteIcon.draggable = false
@@ -229,9 +271,9 @@ function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
         return
     }
     const { pagenoteEles, contentPagenote } = result
-    pagenoteEles.forEach(pagenoteEle=>pagenoteEle.setAttribute('pagenoteid',contentPagenote.pagenoteID.toString()))
+    pagenoteEles.forEach(pagenoteEle=>pagenoteEle.setAttribute('data-pagenoteid',contentPagenote.pagenoteID.toString()))
     const pagenoteIcon=document.createElement('pagenoteIcon')
-    pagenoteIcon.setAttribute('pagenoteid',contentPagenote.pagenoteID.toString())
+    pagenoteIcon.setAttribute('data-pagenoteid',contentPagenote.pagenoteID.toString())
     pagenoteIcon.style.position='relative'
     // pagenoteIcon.innerHTML='&emsp;'
     pagenoteIcon.draggable=false
@@ -263,13 +305,13 @@ function handlerContentMouseup(setPagenotesInfo: TSetContentPagenotes)
             if (initContent == contentPagenote.pagenoteContent) {
                 pagenoteEles.forEach(pagenoteEle => pagenoteEle.outerHTML = pagenoteEle.innerHTML)
                 pagenoteIcon.remove()
-                selectEles(Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${pagenotesInfo[i]?.contentPagenote.pagenoteID}"]`)))
+                selectEles(Array.from(document.querySelectorAll(`pagenoteanchor[data-pagenoteid="${pagenotesInfo[i]?.contentPagenote.pagenoteID}"]`)))
                 return pagenotesInfo
             }
         }
         console.log('contentPagenote...',contentPagenote)
         console.log('pagenoteEles...',pagenoteEles)
-        selectEles(Array.from(document.querySelectorAll(`pagenoteanchor[pagenoteid="${contentPagenote.pagenoteID}"]`)))
+        selectEles(Array.from(document.querySelectorAll(`pagenoteanchor[data-pagenoteid="${contentPagenote.pagenoteID}"]`)))
         return [...pagenotesInfo, {
             pagenoteIcon,
             contentPagenote: {

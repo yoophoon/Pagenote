@@ -1,5 +1,3 @@
-import ReactDOM from 'react-dom/client'
-
 // Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,41 +20,41 @@ import ReactDOM from 'react-dom/client'
 // Registering this listener when the script is first executed ensures that the
 // offscreen document will be able to receive messages when the promise returned
 // by `offscreen.createDocument()` resolves.
-chrome.runtime.onMessage.addListener((message,sender,response)=>{
-    console.log(message)
-    if(message.operation=='generateObjectURL' &&sender){
-        console.log(message.fileURL)
-    }
-    getIMGData(message.fileURL,response)
-    return true
+chrome.runtime.onMessage.addListener((message, sender, response) => {
+  console.log(message)
+  if (message.operation == 'generateObjectURL' && sender) {
+    console.log(message.fileURL)
+  }
+  getIMGData(message.fileURL, response)
+  return true
 });
 
 
-function getIMGData(url: string,response:(response:any)=>void) {
-    fetch(url).then(async res => {
-        const chunks = []
-        const reader = res.body?.getReader()
-        if (!reader) return
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-                break
-            } else {
-                chunks.push(value)
-            }
-        }
-        const result = new Uint8Array(chunks.reduce((a, c) => a + c.length, 0));
-        let offset = 0;
-        for (const chunk of chunks) {
-            result.set(chunk, offset);
-            offset += chunk.length;
-        }
-        const url = URL.createObjectURL(new Blob([result.buffer], { type: "image/*" }))
-        console.log(url)
-        console.log(result)
-        response({response123:url})
-        return url
-    })
+function getIMGData(url: string, response: (response: any) => void) {
+  fetch(url).then(async res => {
+    const chunks = []
+    const reader = res.body?.getReader()
+    if (!reader) return
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break
+      } else {
+        chunks.push(value)
+      }
+    }
+    const result = new Uint8Array(chunks.reduce((a, c) => a + c.length, 0));
+    let offset = 0;
+    for (const chunk of chunks) {
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
+    const url = URL.createObjectURL(new Blob([result.buffer], { type: "image/*" }))
+    console.log(url)
+    console.log(result)
+    response({ response123: url })
+    return url
+  })
 }
 
 // function getIMGBase64(url: string,response:(response:any)=>void) {
@@ -93,14 +91,46 @@ function getIMGData(url: string,response:(response:any)=>void) {
 //     })
 // }
 
-const rootEle=document.createElement('div')
-document.body.appendChild(rootEle)
+// console.log('launch a offscreen document')
+// localStorage.setItem('offscreenItem','yes')
 
-console.log('fuck u')
 
-ReactDOM.createRoot(rootEle).render(
-    <>
-    <h1>fuck u</h1>
-    <img src="#" alt="tupian" />
-    </>
-)
+
+import pagenoteDB from "../lib/storeage/pagenoteDB";
+import { EOperation } from "../pagenoteTypes";
+
+
+
+window.onstorage = e => {
+  if (e.key == 'closedSidepanel' && e.newValue && JSON.parse(e.newValue).origin!=='') {
+    pagenoteDB.sitesConfig.update(JSON.parse(e.newValue).origin, { openSidepanel: false }).then(update => {
+      if (update) {
+        localStorage.setItem('offScreenDocumentUpdateStatue', 'true')
+      } else {
+        localStorage.setItem('offScreenDocumentUpdateStatue', 'false')
+      }
+    }
+    )
+  }
+}
+
+
+
+
+
+const button=document.createElement('button')
+document.body.appendChild(button)
+
+
+chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{
+  console.log(message)
+  if(message.operation==EOperation.openNotesInSidepanel&&message.value.tabID){
+    button.onclick = () => {
+      chrome.sidePanel.open({ tabId: message.value.tabID })
+      chrome.sidePanel.setOptions({ tabId: message.value.tabID, path: chrome.runtime.getURL('sidepanel.html'), enabled: true });
+    }
+    button.click()
+    sendResponse({})
+  }
+  return true
+})

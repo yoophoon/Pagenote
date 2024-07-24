@@ -4,6 +4,8 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import './index.css'
+import { EOperation } from "../pagenoteTypes";
 // import { useRef } from "react";
 
 
@@ -17,13 +19,13 @@ ReactDOM.createRoot(pagenoteRoot).render(<ContentPagenotes></ContentPagenotes>)
 
 
 
-//---------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //页面编辑器：固定在整个页面中央，点击编辑器周边区域即退出
 //这种显示方式是为了方便在任何网页进行笔记记录，响应popup的new pagenote按钮
-//---------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //跟随pagenoteFragment编辑器，当编辑器最小宽度大于pagenoteFragment所在元素节点宽度时采用这种方式显示
 //这种显示方式会遮挡pagenoteFragment后续文本
-//---------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //内嵌在pagenoteFragment节点后方编辑器，当编辑器最小宽度大于pagenoteFragment所在元素节点宽度时采用这种方式显示
 //当pagenoteFragment节点区域空间足够时这种显示方式最好
 
@@ -42,7 +44,6 @@ document.documentElement.append(PagenoteEditor)
 document.body.ondragstart=e=>{
     console.log(e)
 }
-
 
 
 

@@ -2,7 +2,7 @@
 import { IconButton} from '@mui/material';
 import { memo, useContext } from 'react';
 import { SiteConfigContext } from '../ContentPagenotes';
-import { ESiteTheme } from '../../pagenoteTypes';
+import { EOperation, ESiteTheme } from '../../pagenoteTypes';
 import ContrastIcon from '@mui/icons-material/Contrast';
 import NightlightIcon from '@mui/icons-material/Nightlight';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -15,10 +15,19 @@ const SiteTheme=memo(()=>{
         const {siteConfig,setSiteConfig}=siteConfigContext
     
         const handlerSiteTheme=()=>{
-            setSiteConfig(siteConfig=>({
-                ...siteConfig,
-                siteTheme:siteConfig.siteTheme==ESiteTheme.systemDefault?0:siteConfig.siteTheme+1,
-            }))
+            setSiteConfig(siteConfig=>{
+                chrome.runtime.sendMessage({operation:EOperation.siteConfig,value:{
+                    ...siteConfig,
+                    siteTheme:siteConfig.siteTheme==ESiteTheme.systemDefault?0:siteConfig.siteTheme+1,
+                }})
+
+                return ({
+                    ...siteConfig,
+                    siteTheme:siteConfig.siteTheme==ESiteTheme.systemDefault?0:siteConfig.siteTheme+1,
+                })
+            })
+
+            
         }
     console.log('siteConfig...',siteConfig)
         return (

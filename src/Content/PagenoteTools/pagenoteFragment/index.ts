@@ -80,7 +80,7 @@ export default function tryToGeneratePagenote(): { pagenoteEles: HTMLElement[], 
 export function selectEles(target: HTMLElement[]) {
     //重新选中选区
     const selection = window.getSelection()
-    if (selection == null) return
+    if (selection == null || target.length==0) return
     const newSelectedRange = new Range()
     newSelectedRange.setStart(target[0], 0)
     newSelectedRange.setEnd(target[target.length - 1], 1)

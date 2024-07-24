@@ -8,28 +8,33 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { Typography } from '@mui/material';
 import { ESiteTheme } from '../../pagenoteTypes';
 import { OptionsContext } from '../Options';
+import { useLiveQuery } from 'dexie-react-hooks';
+import pagenoteDB from '../../lib/storeage/pagenoteDB';
 
-export default function ToggleFont() {
-  const optionsContext=React.useContext(OptionsContext)
-  if(optionsContext==null) return null
-  const {extensionConfig,setExtensionConfig}=optionsContext
+export default function ToggleTheme() {
+  //获取所有pagneote数据
+  const extensionConfigDB = useLiveQuery(() =>
+    pagenoteDB.sitesConfig.where('origin').equals(window.location.origin).toArray()
+  )
 
 
   const handlerChangeTheme = (
     event: React.MouseEvent<HTMLElement>,
     value: ESiteTheme,
   ) => {
-    setExtensionConfig(extensionConfig=>({
-      ...extensionConfig,
-      extensionTheme:value
-    }))
+    if(extensionConfigDB&&value!==null&&value!==extensionConfigDB[0]?.siteTheme){
+      console.log('extensionConfigDB in theme setting',extensionConfigDB)
+      pagenoteDB.sitesConfig.update(window.location.origin,{siteTheme:value})
+    }
   };
+
+  if(!extensionConfigDB||extensionConfigDB.length==0) return null
 
   return (
     <>
-      <Typography variant='pagenoteSubtitle' component='h6'>快捷键设置</Typography>
+      <Typography id='extension' variant='pagenoteSubtitle' component='h6'>主题设置</Typography>
       <ToggleButtonGroup
-        value={extensionConfig.extensionTheme}
+        value={extensionConfigDB[0].siteTheme}
         exclusive
         fullWidth
         onChange={handlerChangeTheme}
@@ -37,11 +42,18 @@ export default function ToggleFont() {
         sx={{
           paddingLeft:'4rem',
           paddingRight:'4rem',
+          '&>button>svg':{
+            ml:1,
+            mr:1,
+          }
         }}
       >
 
         <ToggleButton value={ESiteTheme.dark} aria-label="left aligned">
-        <NightlightIcon />
+        <NightlightIcon sx={{
+          // ml:1,
+          // mr:1,
+        }}/>
           暗黑主题
         </ToggleButton>
         <ToggleButton value={ESiteTheme.light} aria-label="centered">

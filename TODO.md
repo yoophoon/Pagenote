@@ -1,6 +1,6 @@
 页面构建
 - [x] popup
-- [ ] sidepanelpge
+- [x] sidepanelpage //tried to open sidepanel automatically but failed, see [sidePanel does not automatically open](https://github.com/GoogleChrome/chrome-extensions-samples/issues/982)
 - [x] editor
 - [ ] tools
 - [ ] home

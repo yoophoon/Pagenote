@@ -50,6 +50,20 @@ export const pagenoteTheme:ThemeOptions = {
         }
       }
     },
+    MuiButtonBase:{
+      styleOverrides:{
+        root:({theme})=>({
+          border:'none !important',
+          position:'relative',
+          '&:active':{
+            background:'none !important',
+          },
+          '&:focus':{
+            background:`${theme.palette.action.selected} !important`,
+          },
+        })
+      }
+    },
     MuiTypography: {
       variants: [
         {

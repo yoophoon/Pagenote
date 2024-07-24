@@ -25,6 +25,7 @@ export default function Editor() {
     pagenoteID:contentPagenote.pagenoteID,
     title:contentPagenote.pagenoteTitle,
     titleID:useId(),
+    fragment:contentPagenote.pagenoteFragment??{prefix:'',textStart:'',textEnd:'',suffix:''},
     content:contentPagenote.pagenoteContent,
     markupContent:markUpStr(contentPagenote.pagenoteContent),
     contentID:useId(),
@@ -148,10 +149,11 @@ export default function Editor() {
 import EditorFollowPagenoteFragment from "./EditorFollowPagenoteFragment"
 import EditorAfterPagenoteFragment from "./EditorAfterPagenoteFragment"
 import { markUpStr } from "../lib/markUp"
+import EditorInpage from "./EditorInpage"
 function getPositionedEditor(position:EPosition){
   console.log('position...',position)
   if(position==EPosition.inPage){
-    return <></>
+    return (<EditorInpage />)
   }else if(position==EPosition.followPagenoteFragment){
     return <EditorFollowPagenoteFragment />
   }else if(position==EPosition.afterPagenoteFragment){

@@ -2,7 +2,7 @@ import { common, createStarryNight } from '@wooorm/starry-night'
 import { toHtml } from 'hast-util-to-html'
 import { EOperation, ERenderTarget, TPagenote } from '../pagenoteTypes'
 import { nodesInline } from './lib'
-import pagenoteDB from '../lib/storeage/pagenoteDB'
+import pagenoteDB, { initSiteConfig } from '../lib/storeage/pagenoteDB'
 // import markupRender, { getStaticMarkUp } from './MarkdownRender'
 // import markupRender from './MarkdownRender'
 
@@ -67,26 +67,25 @@ pnChannel.onmessage=e=>{
 
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
     const { operation } = message
-    await setupOffscreenDocument('offScreenHTML.html',()=>{
-            
-    })
+    await setupOffscreenDocument('offScreenHTML.html')
     
-    if (operation == EOperation.openNotesInSidepanel&& sender) {
-        //background无法使用window对象，这里通过message获取其他区域脚本传过来的origin
-        //方便作为sidepanel的地址
-        // let SidepanelPath = extensionURL + 'sidepanel.html'
-        // chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-        //     console.log(tab)
-        //     if (tab.id && sender) {
-        //         //sidePanel.open有bug，链接给了一些解决方案
-        //         //https://stackoverflow.com/questions/77213045/error-sidepanel-open-may-only-be-called-in-response-to-a-user-gesture-re
-        //         chrome.sidePanel.open({ tabId: tab.id });
-        //         SidepanelPath += '?currentTabURL=' + tab.url
-        //         chrome.sidePanel.setOptions({ path: SidepanelPath, enabled: true });
-        //         sendResponse({})
-        //     }
-        // })
-    } else if (operation == EOperation.openEditor) {
+    // if (operation == EOperation.openNotesInSidepanel&& sender) {
+    //     //background无法使用window对象，这里通过message获取其他区域脚本传过来的origin
+    //     //方便作为sidepanel的地址
+    //     // let SidepanelPath = extensionURL + 'sidepanel.html'
+    //     // chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+    //     //     console.log(tab)
+    //     //     if (tab.id && sender) {
+    //     //         //sidePanel.open有bug，链接给了一些解决方案
+    //     //         //https://stackoverflow.com/questions/77213045/error-sidepanel-open-may-only-be-called-in-response-to-a-user-gesture-re
+    //     //         chrome.sidePanel.open({ tabId: tab.id });
+    //     //         SidepanelPath += '?currentTabURL=' + tab.url
+    //     //         chrome.sidePanel.setOptions({ path: SidepanelPath, enabled: true });
+    //     //         sendResponse({})
+    //     //     }
+    //     // })
+    // } else 
+    if (operation == EOperation.openEditor) {
 
     } else if (operation == EOperation.render) {
         console.log(message)
@@ -135,7 +134,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
 })
 
-
+//contentScript 相关消息
 chrome.runtime.onMessage.addListener(function (message,sender,sendResponse){
     const { operation } = message
     if (operation == EOperation.savePagenote && sender) {
@@ -164,6 +163,9 @@ chrome.runtime.onMessage.addListener(function (message,sender,sendResponse){
             sendResponse(res)
         })
         return true
+    } else if(operation==EOperation.missAnchor){
+        console.log('missAnchor',message)
+        pagenoteDB.pagenote.update(message.value.pagenoteID,{pagenoteIndex:-1})
     }
 })
 
@@ -179,10 +181,19 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         }).catch(function (e) {
             console.error(e);
         })
-    } else if(operation==EOperation.getSiteConfig){
+    }else if(operation==EOperation.siteConfigTheme){
+        console.log('siteConfigTheme',message)
+        pagenoteDB.sitesConfig.update(message.value.origin,{siteTheme:message.value.siteTheme})
+    }else if(operation==EOperation.getSiteConfig){
             pagenoteDB.sitesConfig.get(message.value.origin).then(res=>{
-                console.log('message...',message,'siteConfig...',res)
-                sendResponse(res)
+                if(res){
+                    console.log('message...',message,'siteConfig...',res)
+                    sendResponse(res)
+                }else{
+                    console.log('message...',message,'siteConfig...',res)
+                    const initConfig=initSiteConfig(message.value.origin,message.value.title)
+                    sendResponse(initConfig)
+                }
             })
             
            
@@ -198,7 +209,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 
 let creating:Promise<void>|null; // A global promise to avoid concurrency issues
-async function setupOffscreenDocument(path: string,callBack:()=>void) {
+async function setupOffscreenDocument(path: string) {
     // Check all windows controlled by the service worker to see if one
     // of them is the offscreen document with the given path
     const offscreenUrl = chrome.runtime.getURL(path);
@@ -208,27 +219,24 @@ async function setupOffscreenDocument(path: string,callBack:()=>void) {
     });
 
     if (existingContexts.length > 0) {
-        callBack()
         return;
     }
 
     // create offscreen document
     if (creating) {
         await creating;
-        callBack()
     } else {
         creating = chrome.offscreen.createDocument({
             url: path,
-            reasons: [chrome.offscreen.Reason.BLOBS],
+            reasons: [chrome.offscreen.Reason.BLOBS,chrome.offscreen.Reason.DOM_SCRAPING,chrome.offscreen.Reason.LOCAL_STORAGE],
             justification: 'generate object URL',
         });
         await creating;
-        callBack()
         creating = null;
     }
 }
-
-
+//create
+// setupOffscreenDocument('offScreenHTML.html')
 
 chrome.runtime.onConnect.addListener(function (port) {
     port.onMessage.addListener(function (message) {
@@ -298,3 +306,47 @@ chrome.runtime.onConnect.addListener(function (port) {
 // })
 
 
+
+//TODO 监听自动打开侧栏
+//this functionality is not available now 
+//[sidePanel does not automatically open](https://github.com/GoogleChrome/chrome-extensions-samples/issues/982)
+// chrome.tabs.onActivated.addListener(activeInfo => {
+//     chrome.tabs.get(activeInfo.tabId)
+//         .then(tab => {
+//             if (tab.url) {
+//                 const activedTabUrl = new URL(tab.url)
+//                 if (activedTabUrl.origin == chrome.runtime.getURL('')) {
+//                     //if the actived tab is own pages then do nothing
+//                 } else {
+//                     pagenoteDB.sitesConfig.get(activedTabUrl.origin + activedTabUrl.pathname).then(res => {
+//                         if (res?.openSidepanel) {
+//                             console.log('now opensidepanel @', res)
+//                             chrome.sidePanel.open({ tabId: activeInfo.tabId })
+//                             chrome.sidePanel.setOptions({ tabId: tab.id, path: chrome.runtime.getURL('sidepanel.html'), enabled: true });
+//                         }
+//                     })
+//                 }
+//             } else if (tab.pendingUrl) {
+//                 const activedTabUrl = new URL(tab.pendingUrl)
+//                 if (activedTabUrl.origin == chrome.runtime.getURL('')) {
+//                     ////if the actived tab is own pages then do nothing
+//                 } else {
+//                     pagenoteDB.sitesConfig.get(activedTabUrl.origin + activedTabUrl.pathname).then(res => {
+//                         if (res?.openSidepanel) {
+//                             console.log('now opensidepanel @', res)
+//                             chrome.sidePanel.open({ tabId: activeInfo.tabId })
+//                             chrome.sidePanel.setOptions({ tabId: tab.id, path: chrome.runtime.getURL('sidepanel.html'), enabled: true });
+//                         }
+//                     })
+//                 }
+//             } else {
+//                 localStorage.setItem('openSidepanelErrorOn', JSON.stringify({ tab }))
+//             }
+//         })
+// })
+
+
+
+// chrome.tabs.onActivated.addListener(activeInfo=>{
+//     chrome.tabs.sendMessage(activeInfo.tabId,{operation:EOperation.openNotesInSidepanel,value:{tabID:activeInfo.tabId}})
+// })

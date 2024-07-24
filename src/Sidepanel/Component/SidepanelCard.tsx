@@ -12,9 +12,11 @@ import { red } from '@mui/material/colors';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { EPosition, TPagenote } from '../../pagenoteTypes';
+import { EOperation, EPosition, TPagenote } from '../../pagenoteTypes';
 import Paper from '@mui/material/Paper';
 import { ButtonPositionStatic } from '../../Components/styledComponent';
+import PlaceIcon from '@mui/icons-material/Place';
+
 
 type TSidepanelCard={
   pagenote:TPagenote,
@@ -29,6 +31,15 @@ export default function SidepanelCard({pagenote}:TSidepanelCard) {
   //优化方式:采用mouseenter和mouseleave对不同的元素进行监听，即便多次触发事件也为同一事件(事件设置的状态值相同)，避免组件频繁更新
   const mouseInRef=React.useRef<HTMLDivElement | null>(null)
   const mouseOutRef=React.useRef<HTMLDivElement | null>(null)
+
+  const handlerPlaceClick=()=>{
+    chrome.tabs.query({active:true,currentWindow:true},tabs=>{
+      //send message to content script
+      if(tabs[0].id&&pagenote.pagenoteIndex>=0){
+        chrome.tabs.sendMessage(tabs[0].id,{operation:EOperation.scrollIntoView,value:{origin:pagenote.pagenoteTarget,pagenoteID:pagenote.pagenoteID}})
+      }
+    })
+  }
 
   React.useEffect(() => {
     const handlerMouseIn = () => {
@@ -47,13 +58,13 @@ export default function SidepanelCard({pagenote}:TSidepanelCard) {
       mouseOutRef.current?.removeEventListener('mouseleave', handlerMouseOut)
     }
   }, [])
-  if(pagenote.pagenoteTitle==pagenote.pagenoteFragment?.textStart&&pagenote.pagenoteContent==((pagenote?.pagenoteFragment.prefix??'')+
-                                                                                              pagenote?.pagenoteFragment.textStart+
-                                                                                              (pagenote?.pagenoteFragment.textEnd??'')+
-                                                                                              (pagenote?.pagenoteFragment.suffix??''))
-  ){
-    return <div>样式笔记</div>
-  }
+  // if(pagenote.pagenoteTitle==pagenote.pagenoteFragment?.textStart&&pagenote.pagenoteContent==((pagenote?.pagenoteFragment.prefix??'')+
+  //                                                                                             pagenote?.pagenoteFragment.textStart+
+  //                                                                                             (pagenote?.pagenoteFragment.textEnd??'')+
+  //                                                                                             (pagenote?.pagenoteFragment.suffix??''))
+  // ){
+  //   return <div>样式笔记</div>
+  // }
   return (
     <Card sx={{mb:1}} ref={mouseOutRef}>
       {
@@ -103,17 +114,26 @@ export default function SidepanelCard({pagenote}:TSidepanelCard) {
               scrollbarColor: theme => `${theme.palette.success.main} #0000`,
 
             }}>
-            {pagenote.pagenoteContent}
+            {(pagenote.pagenoteTitle == pagenote.pagenoteFragment?.textStart &&
+              pagenote.pagenoteContent == ((pagenote?.pagenoteFragment.prefix ?? '') +
+                (pagenote?.pagenoteFragment.textStart) +
+                (pagenote?.pagenoteFragment.textEnd ?? '') +
+                (pagenote?.pagenoteFragment.suffix ?? '')))
+              ? '样式笔记' : pagenote.pagenoteContent
+            }
           </Paper>
         </CardContent>
       }
       {
-        mouseIn&&<CardActions disableSpacing sx={{p:0,pl:2}}>
-          <ButtonPositionStatic aria-label="add to favorites">
+        mouseIn && <CardActions disableSpacing sx={{p:0,pl:2,'& > button':{position:'relative',pointerEvents:'auto !important'}}}>
+          {/* <ButtonPositionStatic aria-label="add to favorites">
             <FavoriteIcon />
           </ButtonPositionStatic>
           <ButtonPositionStatic aria-label="share">
             <ShareIcon />
+          </ButtonPositionStatic> */}
+          <ButtonPositionStatic aria-label="locate" disabled={pagenote.pagenoteIndex>=0?false:true} title={pagenote.pagenoteIndex>=0?'定位至笔记':'该笔记无法定位'} onClick={handlerPlaceClick}>
+            <PlaceIcon />
           </ButtonPositionStatic>
         </CardActions>
       }

@@ -1,6 +1,9 @@
 import { Box, Paper, Typography, styled } from "@mui/material";
-import ToggleTheme from "./Component/ToggleTheme";
-import ToggleFont from "./Component/ToggleFont";
+import ToggleTheme from "./Component/Theme";
+import SetFont from "./Component/Font";
+import SetShortcuts from "./Component/Shortcuts";
+import SetHighlight from "./Component/HighlightStyle";
+import BlockList from "./Component/BlockList";
 
 const ExtensionPaper=styled(Paper)(({theme})=>({
   minHeight:'100vh',
@@ -8,6 +11,7 @@ const ExtensionPaper=styled(Paper)(({theme})=>({
   boxShadow:theme.shadows[5],
   borderRadius:0,
   overflow:'auto',
+  paddingBottom:theme.typography.fontSize*3
   // borderRadius:theme.typography.htmlFontSize,
 }))
 
@@ -24,8 +28,8 @@ export default function Setting(){
   return (
     <Box sx={{
       width:{ xs: '100%', lg: 'calc(100vw - 310px)' },
-      // minWidth:'720px',
-      padding:'0 100px 0',
+      minWidth:'720px',
+      padding:{xs:'0 40px 0' ,lg:'0 100px 0'},
       
     }}>
       <ExtensionHead variant="h5">
@@ -33,8 +37,10 @@ export default function Setting(){
       </ExtensionHead>
       <ExtensionPaper>
         <ToggleTheme/>
-        <ToggleFont/>
-        <div>禁用列表</div>
+        <SetFont/>
+        <SetShortcuts/>
+        <SetHighlight/>
+        <BlockList/>
       </ExtensionPaper>
       <ExtensionHead variant="h5">
         网页功能设置

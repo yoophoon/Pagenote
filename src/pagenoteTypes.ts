@@ -18,7 +18,14 @@ export enum EOperation {
     render,
     sidePanel,
     siteConfig,
+    //因为sidepanel的主题需要和扩展在网页的主题保持立即响应，
+    //该操作在每次修改siteConfig.siteTheme之后执行
+    siteConfigTheme,
     getSiteConfig,
+    //定位到目标页面的pagenote
+    scrollIntoView,
+    //如果页面内容发生改变导致pagenoteFragment匹配不上页面内容
+    missAnchor,
 }
 
 export enum EPosition {
@@ -55,6 +62,12 @@ export interface IEditorProps extends React.HTMLAttributes<HTMLElement> {
 export enum ERenderTarget {
     hightlight,
     markup,
+}
+
+export enum EPagenoteOrder{
+    creation,
+    modification,
+    position,
 }
 
 export type TPagenoteNodes = {
@@ -116,6 +129,7 @@ export type TEditorStatus={
     pagenoteID:number,
     title:string,
     titleID:string,
+    fragment:TPagenoteFragment,
     content:string,
     markupContent:string,
     contentID:string,
@@ -141,14 +155,25 @@ export enum ESiteTheme{
     systemDefault,
 }
 
+export enum EHighlightStyle{
+    bg,
+    underLine,
+}
+
+
 export type TSiteConfig={
     origin:string,
+    title:string,
     siteTheme:ESiteTheme,
     showPagenote:boolean,
     showPositionBar:boolean,
     onThisSite:boolean,
     showEditorTitle:boolean,
     showEditorTools:boolean,
+    shortcutsOn:boolean,
+    shortcuts:TShortcut[],
+    highLightStyle:EHighlightStyle,
+    openSidepanel:boolean,
 }
 
 export type TSetSiteConfig=React.Dispatch<React.SetStateAction<TSiteConfig>>
@@ -161,7 +186,32 @@ export enum ESection{
     backup,
 }
 
+export enum EShortcut {
+    //是否启用sidepanel boolean
+    toggleSidepanel,
+    //页面跳转 boolean
+    //TODO home 仅做展示用，是否需要为其添加快捷键跳转
+    // home,    
+    list,
+    options,
+    //是否将当前网页的笔记展示在页面内 boolean
+    pagenotesInpage,
+    //hightlight高亮设置 enum
+    toggleHightlightStyle,
+
+}
+
+export type TShortcut={
+    on:boolean,
+    leadingKey:'Shift'|'Alt'|'Ctrl',
+    key:string,
+    type:EShortcut,
+    title?:string,
+    description:string,
+}
 
 export type TExtensionConfig={
     extensionTheme:ESiteTheme,
+    shortcutsOn:boolean,
+    shortcuts:TShortcut[],
 }

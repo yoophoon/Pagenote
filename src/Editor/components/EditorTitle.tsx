@@ -1,5 +1,5 @@
 import { Typography, useTheme } from "@mui/material"
-import { useContext } from "react"
+import { useContext, useEffect, useRef } from "react"
 import {EditorContext} from '..'
 
 /**
@@ -16,6 +16,8 @@ export default function EditorTitle() {
     //处理双击事件，如果用户对title元素进行双击，先将元素的contenteditable设置为plaintext-only
     //然后选中title的全部文字等待用户修改，代替之前的浏览器弹窗修改标题，这样更符合用户使用习惯
     const handlerDoubleClick = (e:React.MouseEvent) => {        
+        e.preventDefault()
+        e.stopPropagation();
         (e.target as EventTarget&Element).setAttribute('contenteditable', 'plaintext-only')
         
         // const selectedRange = new Range()
@@ -39,8 +41,22 @@ export default function EditorTitle() {
         // editorTitleEle.setAttribute('contenteditable', 'false')
     }
 
+    const handlerMouseUp=(e:React.MouseEvent)=>{
+        e.stopPropagation()
+        e.preventDefault()
+    }
+
+    const pagenoteTitle=useRef<HTMLHeadingElement | null>(null)
+
+    useEffect(()=>{
+        if(pagenoteTitle.current){
+            pagenoteTitle.current.setAttribute('data-pagenoteid',editorStatus.pagenoteID+'')
+        }
+    },[pagenoteTitle.current])
+
     return (< Typography
         id={editorStatus.titleID}
+        ref={pagenoteTitle}
         variant='pagenoteH6'
         component="h4"
         textAlign={'center'}
@@ -50,6 +66,7 @@ export default function EditorTitle() {
         // onClick={e=>handlerClick(e)}
         onDoubleClick={e=>handlerDoubleClick(e)}
         onBlur={e=>handlerBlur(e)}
+        onMouseUp={handlerMouseUp}
         sx={{
             color:`${theme.palette.primary.main} !important`
         }}

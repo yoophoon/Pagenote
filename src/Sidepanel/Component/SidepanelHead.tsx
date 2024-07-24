@@ -4,21 +4,25 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import { TPagenote } from '../../pagenoteTypes';
+import { EPagenoteOrder, TPagenote } from '../../pagenoteTypes';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Menu, MenuItem } from '@mui/material';
 
 type TSidepanelHead ={
   pagenotesOnCurrentSite: TPagenote[] | undefined,
   activeTab:string,
+  setPagenoteOrder:React.Dispatch<React.SetStateAction<EPagenoteOrder>>,
 }
 
-export default function SidepanelHead({ pagenotesOnCurrentSite, activeTab }: TSidepanelHead) {
+export default function SidepanelHead({ pagenotesOnCurrentSite, activeTab, setPagenoteOrder }: TSidepanelHead) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
+  
   const handlerSettingClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
+
   return (
     <Box sx={{ flexGrow: 1,position:'sticky',top:0 }}>
       <AppBar position="static">
@@ -53,21 +57,22 @@ export default function SidepanelHead({ pagenotesOnCurrentSite, activeTab }: TSi
               </Typography>
             </Typography>
           </Typography>
-          <IconButton onClick={handlerSettingClick}>
+          <IconButton onClick={handlerSettingClick} title='设置排序方式'>
             <SettingsIcon />
           </IconButton>
           <Menu
             id="basic-menu"
             anchorEl={anchorEl}
             open={menuOpen}
+            
             onClose={() => setAnchorEl(null)}
             MenuListProps={{
               'aria-labelledby': 'basic-button',
             }}
           >
-            <MenuItem onClick={() => setAnchorEl(null)}>Profile</MenuItem>
-            <MenuItem onClick={() => setAnchorEl(null)}>My account</MenuItem>
-            <MenuItem onClick={() => setAnchorEl(null)}>Logout</MenuItem>
+            <MenuItem onClick={() => {setPagenoteOrder(EPagenoteOrder.creation);setAnchorEl(null)}}>创建时间</MenuItem>
+            <MenuItem onClick={() => {setPagenoteOrder(EPagenoteOrder.modification);setAnchorEl(null)}}>修改时间</MenuItem>
+            <MenuItem onClick={() => {setPagenoteOrder(EPagenoteOrder.position);setAnchorEl(null)}}>页面位置</MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>

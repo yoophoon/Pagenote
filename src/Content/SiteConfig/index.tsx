@@ -29,6 +29,7 @@ export default function SiteConfig() {
   const handlerClickAway = () => {
     setShowSiteConfig(false)
     console.log('click away')
+    console.log(siteConfig)
     chrome.runtime.sendMessage({
       operation:EOperation.siteConfig,
       value:siteConfig

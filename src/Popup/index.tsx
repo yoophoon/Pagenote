@@ -8,7 +8,7 @@ import { red } from '@mui/material/colors';
 import { Paper, Stack, SvgIcon } from '@mui/material';
 import './index.css'
 import Bottom from './Bottomer'
-import { GitHub, MaterialUi, React, Vite } from '../assets/svg'
+import { GitHub, MaterialUi, SvgReact, Vite } from '../assets/svg'
 
 export default function Popup() {
     return (
@@ -29,7 +29,7 @@ export default function Popup() {
                             powered by
                         </Typography>
                         <SvgIcon component={GitHub} inheritViewBox sx={{ width: 12, height: 12 }}></SvgIcon>
-                        <SvgIcon component={React} inheritViewBox sx={{ width: 12, height: 12 }}></SvgIcon>
+                        <SvgIcon component={SvgReact} inheritViewBox sx={{ width: 12, height: 12 }}></SvgIcon>
                         <SvgIcon component={MaterialUi} inheritViewBox sx={{ width: 12, height: 12 }}></SvgIcon>
                         <SvgIcon component={Vite} inheritViewBox sx={{ width: 12, height: 12 }}></SvgIcon>
                     </Stack>

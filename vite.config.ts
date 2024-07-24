@@ -48,7 +48,11 @@ const manifest = defineManifest({
       "resources":["*"],
       "matches":["<all_urls>"],
       "use_dynamic_url":true,
-    }
+    },
+    // {
+    //   "resources":["src/assets/pagenote32×32.png"],
+    //   "matches":["<all_urls>"],
+    // }
   ]
 })
 
@@ -63,7 +67,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         Home: path.resolve(__dirname, 'home.html'),
-        OffScreenHTML:path.resolve(__dirname,'offScreenHTML.html')
+        OffScreenHTML:path.resolve(__dirname,'offScreenHTML.html'),
+        List:path.resolve(__dirname,'list.html')
       },
     },
   },

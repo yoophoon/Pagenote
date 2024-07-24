@@ -9,26 +9,16 @@ import { Typography } from '@mui/material';
 import { ESiteTheme } from '../../pagenoteTypes';
 import { OptionsContext } from '../Options';
 
-export default function ToggleTheme() {
-  const optionsContext=React.useContext(OptionsContext)
-  if(optionsContext==null) return null
-  const {extensionConfig,setExtensionConfig}=optionsContext
+export default function SetFont() {
+  
 
 
-  const handlerChangeTheme = (
-    event: React.MouseEvent<HTMLElement>,
-    value: ESiteTheme,
-  ) => {
-    setExtensionConfig(extensionConfig=>({
-      ...extensionConfig,
-      extensionTheme:value
-    }))
-  };
+  
 
   return (
     <>
-      <Typography variant='pagenoteSubtitle' component='h6'>主题设置</Typography>
-      <ToggleButtonGroup
+      <Typography variant='pagenoteSubtitle' component='h6'>字体设置</Typography>
+      {/* <ToggleButtonGroup
         value={extensionConfig.extensionTheme}
         exclusive
         fullWidth
@@ -52,7 +42,7 @@ export default function ToggleTheme() {
           <ContrastIcon />
           跟随系统
         </ToggleButton>
-      </ToggleButtonGroup>
+      </ToggleButtonGroup> */}
     </>
   );
 }
