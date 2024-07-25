@@ -27,8 +27,23 @@ export default function EditorInpage(){
   const { editorStatus ,setEditorStatus} = editorContext
   
   const [open, setOpen] = React.useState(editorStatus.open);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  
+  const handleClose = () => {
+    if(editorStatus.content!==((editorStatus.fragment.prefix??'')+
+                              (editorStatus.fragment.textStart??'')+
+                              (editorStatus.fragment.textEnd??'')+
+                              (editorStatus.fragment.suffix??'')))
+    {
+      const savePagenote = confirm("存在已编辑内容，是否保存")
+      if(savePagenote){
+        setEditorStatus(editorStatus=>({
+          ...editorStatus,
+          open:false,
+        }))
+      }
+    }
+    setOpen(false)
+  }
 
   const [showTitleAndTools,setShowTitleTools]=React.useState({
     showTitle:editorStatus.showTitle,
@@ -76,7 +91,6 @@ export default function EditorInpage(){
 
   return (
     <div>
-      <Button onClick={handleOpen}>Open modal</Button>
       <Modal
         disableEnforceFocus
         open={open}

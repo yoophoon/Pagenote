@@ -11,7 +11,7 @@ export default function EditorTitle() {
 
     const editorContext=useContext(EditorContext)
     if (editorContext == null) { return }
-    const {editorStatus}=editorContext
+    const {editorStatus,setEditorStatus}=editorContext
     const theme=useTheme()
     //处理双击事件，如果用户对title元素进行双击，先将元素的contenteditable设置为plaintext-only
     //然后选中title的全部文字等待用户修改，代替之前的浏览器弹窗修改标题，这样更符合用户使用习惯
@@ -36,6 +36,12 @@ export default function EditorTitle() {
     //方便其他组件获取标题
     const handlerBlur = (e:React.FocusEvent<HTMLHeadingElement, Element>) => {
         (e.target as EventTarget&Element).removeAttribute('contenteditable')
+        if(e.target.innerText!==editorStatus.title){
+            setEditorStatus(editorStatus=>({
+                ...editorStatus,
+                title:e.target.innerText,
+            }))
+        }
         // const editorTitleEle = document.querySelector('#pagenote-editor-title')
         // if (editorTitleEle == null) return
         // editorTitleEle.setAttribute('contenteditable', 'false')

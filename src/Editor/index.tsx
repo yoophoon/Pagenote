@@ -3,7 +3,7 @@
 // import EditorToolBar from "./components/EditorToolBar"
 // import EditorContent from "./components/EditorContent"
 
-import { EPosition, TEditorStatus} from "../pagenoteTypes"
+import { EOperation, EPosition, TEditorStatus} from "../pagenoteTypes"
 import { createContext, useContext, useEffect, useId, useState } from "react"
 import {PagenoteAnchorContext} from '../Content/PagenoteTools/PagenoteIcon'
 
@@ -72,13 +72,23 @@ export default function Editor() {
         ...contentPagenote,
         pagenoteTitle:editorStatus.title,
         pagenoteContent:editorStatus.content,
-        showTools:!editorStatus.open,
+        showTools:contentPagenote.pagenoteIndex>0?!editorStatus.open:false,
         showEditor:editorStatus.open,
         showEditorTitle:editorStatus.showTitle,
         showEditorTools:editorStatus.showTools,
         renderMarkdown:editorStatus.renderMarkdown,
       }))
       setTool('')
+
+      chrome.runtime.sendMessage({
+        operation:EOperation.savePagenote,
+        value:{
+          ...contentPagenote, 
+          showEditor: false, 
+          pagenoteTitle:editorStatus.title,
+          pagenoteContent:editorStatus.content,
+        },
+      })
     }
   },[editorStatus.open])
 
