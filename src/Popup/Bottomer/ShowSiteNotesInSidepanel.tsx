@@ -3,8 +3,32 @@ import { Description } from "@mui/icons-material";
 // import { EOperation } from "../../pagenoteTypes";
 import Zoom from '@mui/material/Zoom'
 import pagenoteDB from "../../lib/storeage/pagenoteDB";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useState } from "react";
 const extensionURL = chrome.runtime.getURL('')
 export function ShowSiteNotes() {
+    const [sidepanelAccessible, setSidepanelAccessible] = useState(false)
+    
+
+
+      chrome.tabs.query({currentWindow:true,active:true},([tab]) => {
+        console.log('currentWindow...',tab)
+        if (tab.url) {
+          const activedTabUrl = new URL(tab.url)
+          if(activedTabUrl.origin==chrome.runtime.getURL('')){
+            setSidepanelAccessible(false)
+          }else{
+            pagenoteDB.sitesConfig.get(activedTabUrl.origin + activedTabUrl.pathname).then(res=>{
+                if(res){
+                    setSidepanelAccessible(true)
+                }else{
+                    setSidepanelAccessible(false)
+                }
+            })
+          }
+        }
+      })
+    
     const handleClick = () => {
         // chrome.runtime.sendMessage({
         //     operation: EOperation.openNotesInSidepanel,
@@ -37,7 +61,7 @@ export function ShowSiteNotes() {
 
     return (
         <Tooltip title="Show Site Notes in sidepanel" TransitionComponent={Zoom} arrow>
-            <IconButton aria-label="show all notes" onClick={handleClick}>
+            <IconButton aria-label="show all notes" onClick={handleClick} disabled={!sidepanelAccessible}>
                 <Badge badgeContent='S' anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'right',

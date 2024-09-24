@@ -164,6 +164,8 @@ export enum EHighlightStyle{
 export type TSiteConfig={
     origin:string,
     title:string,
+    //网页标签图标url
+    icon:string,
     siteTheme:ESiteTheme,
     showPagenote:boolean,
     showPositionBar:boolean,

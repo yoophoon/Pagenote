@@ -24,6 +24,7 @@ export default function ContentPagenotes()
     const [siteConfig, setSiteConfig]=useState<TSiteConfig>({
         origin:window.location.origin+window.location.pathname,
         title:document.querySelector('title')?.innerHTML??'',
+        icon:document.querySelector('link[rel*="icon"]')?new URL((document.querySelector('link[rel*="icon"]') as HTMLLinkElement).href).href:(window.location.origin+'/favicon.ico'),
         siteTheme:ESiteTheme.dark,
         showPagenote:false,
         showPositionBar:false,
@@ -66,6 +67,7 @@ export default function ContentPagenotes()
       value: {
         origin: window.location.origin + window.location.pathname,
         title:document.querySelector('title')?.innerHTML??'',
+        icon:document.querySelector('link[rel*="icon"]')?new URL((document.querySelector('link[rel*="icon"]') as HTMLLinkElement).href).href:(window.location.origin+'/favicon.ico'),
       }
     }, response => {
       console.log('EOperation.getSiteConfig...', response)

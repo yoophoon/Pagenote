@@ -1,11 +1,13 @@
-import { Box, CssBaseline, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { Box, CssBaseline, Divider, ThemeProvider, Typography, createTheme } from "@mui/material";
 import PagenoteAppBar from "../Components/PagenoteAppBar";
 import { useLiveQuery } from "dexie-react-hooks";
 import pagenoteDB from "../lib/storeage/pagenoteDB";
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { pagenoteTheme } from "../Theme";
 import { EHighlightStyle, ESiteTheme } from "../pagenoteTypes";
 import { pagenoteShortcuts } from "../lib/common";
+
+import PagenotesItem from "./PagenotesItem";
 
 export default function PagenotesList(){
   //获取所有pagneote数据
@@ -39,6 +41,7 @@ export default function PagenotesList(){
       pagenoteDB.sitesConfig.put({
         origin:window.location.origin,
         title:'轻松给网页留下你的笔记',
+        icon:chrome.runtime.getURL('favicon.ico'),
         siteTheme:ESiteTheme.dark,
         showPagenote:true,
         showEditorTools:false,
@@ -73,32 +76,44 @@ export default function PagenotesList(){
 
 
 
-  const [sitesWithPagenotes,setSitesWithPagenotes]=useState<{origin:string,title:string,num:number,folder:boolean}[]>([])
+  const [sitesWithPagenotes,setSitesWithPagenotes]=useState<{origin:string,title:string,icon:string ,num:number,folder:boolean}[]>([])
 
-  if (pagenotes && pagenotes.length > 0) {
-    pagenotes.forEach(pagenote => {
-      pagenoteDB.sitesConfig.get(pagenote.pagenoteTarget).then(res => {
-        if (res) {
-          setSitesWithPagenotes(sitesWithPagenotes => {
-            if (sitesWithPagenotes.filter(site => site.origin === pagenote.pagenoteTarget).length === 0) {
-              return [...sitesWithPagenotes, { origin: pagenote.pagenoteTarget, title: res.title, num: pagenotes.filter(pagenoteF => pagenoteF.pagenoteTarget === pagenote.pagenoteTarget).length, folder: false }]
-            }
-            return sitesWithPagenotes
-          })
-        } else {
-          setSitesWithPagenotes(sitesWithPagenotes => {
-            if (sitesWithPagenotes.filter(site => site.origin === pagenote.pagenoteTarget).length === 0) {
-              return [...sitesWithPagenotes, { origin: pagenote.pagenoteTarget, title: '', num: pagenotes.filter(pagenoteF => pagenoteF.pagenoteTarget === pagenote.pagenoteTarget).length, folder: false }]
-            }
-            return sitesWithPagenotes
-          })
-        }
+  
+  const pagenoteLengthRef=useRef<number>(pagenotes?.length??0)
+  useEffect(() => {
+    //TODO sitesWithPagenotes.num 无法正常更新
+    if (pagenotes && pagenotes.length > 0&&pagenoteLengthRef.current!==pagenotes?.length) {
+      pagenotes.forEach(pagenote => {
+        pagenoteDB.sitesConfig.get(pagenote.pagenoteTarget).then(res => {
+          if (res) {
+            setSitesWithPagenotes(sitesWithPagenotes => {
+              if (sitesWithPagenotes.filter(site => site.origin === pagenote.pagenoteTarget).length === 0) {
+                return [...sitesWithPagenotes, { origin: pagenote.pagenoteTarget, title: res.title, icon: res.icon, num: pagenotes.filter(pagenoteF => pagenoteF.pagenoteTarget === pagenote.pagenoteTarget).length, folder: false }]
+              }
+              //需要更新num属性
+              return [...sitesWithPagenotes.filter(site=>site.origin!==pagenote.pagenoteTarget),{...sitesWithPagenotes.filter(site=>site.origin===pagenote.pagenoteTarget)[0],num: pagenotes.filter(pagenoteF => pagenoteF.pagenoteTarget === pagenote.pagenoteTarget).length}]
+            })
+          } else {
+            setSitesWithPagenotes(sitesWithPagenotes => {
+              if (sitesWithPagenotes.filter(site => site.origin === pagenote.pagenoteTarget).length === 0) {
+                return [...sitesWithPagenotes, { origin: pagenote.pagenoteTarget, title: '', icon: '', num: pagenotes.filter(pagenoteF => pagenoteF.pagenoteTarget === pagenote.pagenoteTarget).length, folder: false }]
+              }
+              //需要更新num属性
+              return [...sitesWithPagenotes.filter(site=>site.origin!==pagenote.pagenoteTarget),{...sitesWithPagenotes.filter(site=>site.origin===pagenote.pagenoteTarget)[0],num: pagenotes.filter(pagenoteF => pagenoteF.pagenoteTarget === pagenote.pagenoteTarget).length}]
+            })
+          }
+        })
       })
-    })
-  }
+      pagenoteLengthRef.current=pagenotes.length
+    }
+
+  }, [pagenotes])
 
   console.log(sitesWithPagenotes)
 
+  //----------------------------------------------------------------------------
+  //页面逻辑
+  //
   const handlerSetFolder = (origin: string) => {
     setSitesWithPagenotes(sitesWithPagenotes => {
       return sitesWithPagenotes.map(site => {
@@ -109,6 +124,8 @@ export default function PagenotesList(){
       })
     })
   }
+
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -162,16 +179,16 @@ export default function PagenotesList(){
                   <Typography component={'a'} href={site.origin} target="_blank" title="跳转至该网页" sx={{
                     color: 'unset',
                     textDecoration: 'none',
-                    verticalAlign: 'middle',
+                    verticalAlign: 'bottom',
                     fontSize: '1.1rem',
                     height:'1.1rem',
                     lineHeight: '1.1rem',
                   }}>
-                    <img src={new URL(site.origin).origin + '/favicon.ico'} style={{
+                    <img src={site.icon} style={{
                       width: '1.1rem',
                       height: '1.1rem',
                       marginRight: '0.5rem',
-                      verticalAlign: 'middle',
+                      verticalAlign: 'bottom',
                     }}></img>
                     {site.origin}
                   </Typography>
@@ -199,28 +216,8 @@ export default function PagenotesList(){
                   </Typography>
                 </Box>
                 {!site.folder&&pagenotes.filter(pagenote => pagenote.pagenoteTarget === site.origin).map(pagenote => (
-                  <Box key={pagenote.pagenoteID} sx={{
-                    marginLeft: '3rem',
-                    padding: '1rem',
-                    paddingRight:'2rem',
-                    paddingBottom:0,
-                    borderLeftColor: theme.palette.secondary.main,
-                    borderLeftStyle: 'solid',
-                    borderLeftWidth: '2px',
-                    
-                  }}>
-                    <Box sx={{
-                      backgroundColor: theme.palette.secondary.main+'99',
-                      // backgroundClip: 'content-box',
-                      borderRadius:'5px',
-                      padding:'1rem',
-                    }}>
-                      {pagenote.pagenoteTitle}
-                      <Typography>
-                        {pagenote.pagenoteContent}
-                      </Typography>
-                    </Box>
-                  </Box>)
+                  <PagenotesItem key={pagenote.pagenoteID} pagenote={pagenote}></PagenotesItem>  
+                )
                 )}
               </Fragment>
             )) :

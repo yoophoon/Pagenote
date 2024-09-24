@@ -191,7 +191,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
                     sendResponse(res)
                 }else{
                     console.log('message...',message,'siteConfig...',res)
-                    const initConfig=initSiteConfig(message.value.origin,message.value.title)
+                    const initConfig=initSiteConfig(message.value.origin,message.value.title,message.value.icon)
                     sendResponse(initConfig)
                 }
             })

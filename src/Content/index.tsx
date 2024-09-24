@@ -17,7 +17,11 @@ document.documentElement.append(pagenoteRoot)
 ReactDOM.createRoot(pagenoteRoot).render(<ContentPagenotes></ContentPagenotes>)
 
 
+function TestComponent(){
+    return (<div>hello world</div>)
+}
 
+console.log(<TestComponent></TestComponent>)
 
 //------------------------------------------------------------------------------
 //页面编辑器：固定在整个页面中央，点击编辑器周边区域即退出

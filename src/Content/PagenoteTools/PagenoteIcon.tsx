@@ -194,7 +194,7 @@ const PagenoteIcon = memo((props: TPagenoteIcon) => {
       //符合上述条件的pagenoteContent会被认为是一个有效的pagenote
       setTool('')
       setContentPagenote(contentPagenote => {
-        chrome.runtime.sendMessage({operation:EOperation.savePagenote,value:{ ...contentPagenote, showTools: false, }})
+        chrome.runtime.sendMessage({operation:EOperation.savePagenote,value:{ ...contentPagenote, showTools: false, pagenoteTimestamp: new Date().getTime(),}})
         return ({ ...contentPagenote, showTools: false, })
       })
     } else {

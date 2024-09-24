@@ -19,10 +19,11 @@ export default pagenoteDB
 
 
 
-export function initSiteConfig(origin:string,title:string){
+export function initSiteConfig(origin:string,title:string,icon:string){
     const _initSiteConfig:TSiteConfig={
         origin,
         title,
+        icon,
         siteTheme:ESiteTheme.dark,
         showPagenote:false,
         showEditorTitle:true,

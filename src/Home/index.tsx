@@ -48,6 +48,7 @@ function Home() {
       pagenoteDB.sitesConfig.put({
         origin:window.location.origin,
         title:'轻松给网页留下你的笔记',
+        icon:chrome.runtime.getURL('favicon.ico'),
         siteTheme:ESiteTheme.dark,
         showPagenote:true,
         showEditorTools:false,
